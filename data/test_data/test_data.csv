@@ -1,0 +1,9 @@
+id,name,category,department,region,performance_score,employee_count,revenue
+1,Marketing Team A,Marketing,Sales,North,85.5,12,1250000
+2,Engineering Team B,Engineering,Technology,South,92.3,18,2100000
+3,Sales Team C,Sales,Sales,East,78.9,8,980000
+4,HR Team D,HR,Administration,West,88.2,5,450000
+5,Finance Team E,Finance,Administration,North,91.7,6,890000
+6,Product Team F,Product,Technology,South,87.4,15,1750000
+7,Support Team G,Support,Customer Service,East,82.1,10,650000
+8,Legal Team H,Legal,Administration,West,89.6,4,320000 

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data>
+  <record id="1" active="true">
+    <id>1</id>
+    <name>Marketing Team A</name>
+    <category>Marketing</category>
+    <department>Sales</department>
+    <region>North</region>
+    <performance_score>85.5</performance_score>
+    <employee_count>12</employee_count>
+    <revenue>1250000</revenue>
+    <is_active>true</is_active>
+    <created_date>2024-01-15</created_date>
+  </record>
+  <record id="2" active="true">
+    <id>2</id>
+    <name>Engineering Team B</name>
+    <category>Engineering</category>
+    <department>Technology</department>
+    <region>South</region>
+    <performance_score>92.3</performance_score>
+    <employee_count>18</employee_count>
+    <revenue>2100000</revenue>
+    <is_active>true</is_active>
+    <created_date>2024-01-20</created_date>
+  </record>
+  <record id="3" active="false">
+    <id>3</id>
+    <name>Sales Team C</name>
+    <category>Sales</category>
+    <department>Sales</department>
+    <region>East</region>
+    <performance_score>78.9</performance_score>
+    <employee_count>8</employee_count>
+    <revenue>980000</revenue>
+    <is_active>false</is_active>
+    <created_date>2024-02-01</created_date>
+  </record>
+</data> 

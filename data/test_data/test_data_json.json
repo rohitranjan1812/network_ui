@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "name": "Marketing Team A",
+    "category": "Marketing",
+    "department": "Sales",
+    "region": "North",
+    "performance_score": 85.5,
+    "employee_count": 12,
+    "revenue": 1250000,
+    "is_active": true,
+    "created_date": "2024-01-15"
+  },
+  {
+    "id": 2,
+    "name": "Engineering Team B",
+    "category": "Engineering",
+    "department": "Technology",
+    "region": "South",
+    "performance_score": 92.3,
+    "employee_count": 18,
+    "revenue": 2100000,
+    "is_active": true,
+    "created_date": "2024-01-20"
+  },
+  {
+    "id": 3,
+    "name": "Sales Team C",
+    "category": "Sales",
+    "department": "Sales",
+    "region": "East",
+    "performance_score": 78.9,
+    "employee_count": 8,
+    "revenue": 980000,
+    "is_active": false,
+    "created_date": "2024-02-01"
+  }
+] 

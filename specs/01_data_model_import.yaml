@@ -1,0 +1,73 @@
+# Module: Data Model Import
+# Version: 1.0
+# Description: Handles the import, parsing, and transformation of user data into a standardized graph format.
+
+metadata:
+  name: DataModelImport
+  version: "1.0.0"
+  author: "Agentic AI Development"
+
+spec:
+  description: "A robust data import and parsing module that supports various file formats and data structures. It transforms raw data into a standardized node-edge list format for the Graph Engine."
+
+  functionalities:
+    - id: "F-DMI-001"
+      description: "File-based data import."
+      details:
+        - "Support for CSV, JSON, and XML file formats."
+        - "User should be able to specify file encoding (e.g., UTF-8, ASCII)."
+        - "Provide a file browser dialog for easy file selection."
+    - id: "F-DMI-002"
+      description: "Data mapping UI."
+      details:
+        - "A user interface to map columns (from CSV) or keys (from JSON/XML) to graph properties."
+        - "Users must be able to designate columns/keys as node identifiers, source nodes, target nodes, node attributes, or edge attributes."
+        - "Support for defining data types for attributes (e.g., String, Integer, Float, Boolean, Date)."
+    - id: "F-DMI-003"
+      description: "Handling of qualitative and quantitative data."
+      details:
+        - "Quantitative data (numbers, dates) should be parsed and stored with their native types."
+        - "Qualitative data (text, categories) should be handled as strings or enumerated types."
+        - "Automatic detection of data types with user override."
+    - id: "F-DMI-004"
+      description: "Real-time data preview."
+      details:
+        - "Display a preview of the parsed data in a table before final import."
+        - "Highlight any parsing errors or inconsistencies in the preview."
+    - id: "F-DMI-005"
+      description: "Error handling and logging."
+      details:
+        - "Detailed error messages for invalid file formats, parsing errors, or mapping conflicts."
+        - "Generate a log file for each import session."
+
+  api:
+    - endpoint: "/import"
+      method: "POST"
+      description: "Initiates the data import process."
+      request:
+        payload:
+          - name: "filePath"
+            type: "string"
+            description: "The local path to the data file."
+          - name: "mappingConfig"
+            type: "object"
+            description: "JSON object defining the mapping from data fields to graph elements."
+      response:
+        - status: "200 OK"
+          body:
+            type: "object"
+            properties:
+              - name: "graphData"
+                type: "object"
+                description: "Standardized graph object containing nodes and edges."
+                schema:
+                  nodes: "Array<Node>"
+                  edges: "Array<Edge>"
+              - name: "importLog"
+                type: "string"
+                description: "Log of the import process."
+        - status: "400 Bad Request"
+          body:
+            description: "Error details if the import fails."
+
+  dependencies: [] # This is a foundational module

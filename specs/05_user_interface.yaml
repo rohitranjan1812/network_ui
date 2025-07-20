@@ -1,0 +1,55 @@
+# Module: User Interface
+# Version: 1.0
+# Description: The main application GUI, including menus, toolbars, and panels.
+
+metadata:
+  name: UserInterface
+  version: "1.0.0"
+  author: "Agentic AI Development"
+
+spec:
+  description: "The primary user interface that orchestrates the different modules and provides controls for all application functionalities."
+
+  components:
+    - id: "C-UI-001"
+      name: "Main Window"
+      description: "The main application window."
+      layout:
+        - "Menu Bar (File, Edit, View, Analysis, Help)"
+        - "Toolbar (Quick access to common tools)"
+        - "Main Canvas Area (for GraphVisualization)"
+        - "Side Panel (for data details, analysis controls, visual styling)"
+        - "Status Bar (for feedback and progress)"
+    - id: "C-UI-002"
+      name: "Data Import Wizard"
+      description: "A step-by-step wizard that uses the DataModelImport module."
+    - id: "C-UI-003"
+      name: "Analysis Panel"
+      description: "A panel to select, configure, and run algorithms from the GraphAnalytics module."
+      details:
+        - "Dropdown to select an algorithm."
+        - "Dynamic form for algorithm parameters."
+        - "Button to execute analysis."
+        - "Area to display analysis results."
+    - id: "C-UI-004"
+      name: "Visual Styling Panel"
+      description: "A panel to control the visual appearance of the graph."
+      details:
+        - "Controls for default node/edge appearance."
+        - "UI to create data-driven visual mapping rules."
+    - id: "C-UI-005"
+      name: "Details-on-Demand Panel"
+      description: "Shows attributes and information for the currently selected node or edge."
+
+  functionalities:
+    - "Connects user actions (button clicks, menu selections) to the APIs of other modules."
+    - "Listens for events from other modules (e.g., `onNodeClick` from Visualization) to update its state."
+    - "Manages application state (e.g., current project, unsaved changes)."
+
+  dependencies:
+    - "DataModelImport"
+    - "GraphEngine"
+    - "GraphAnalytics"
+    - "GraphVisualization"
+    - "DataPersistence"
+    - "ExportEngine"

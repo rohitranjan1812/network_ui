@@ -1,0 +1,22 @@
+# Core dependencies
+flask==2.3.3
+pandas==2.1.1
+numpy==1.24.3
+lxml==4.9.3
+python-dateutil==2.8.2
+werkzeug==2.3.7
+flask-cors==4.0.0
+
+# Testing dependencies
+pytest==7.4.0
+pytest-cov==4.1.0
+pytest-mock==3.11.1
+pytest-xdist==3.3.1
+
+# Code quality
+flake8==6.0.0
+black==23.7.0
+mypy==1.5.1
+
+# Development tools
+coverage==7.2.7 

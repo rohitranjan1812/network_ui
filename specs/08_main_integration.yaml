@@ -1,0 +1,56 @@
+# Module: Main Integration Plan
+# Version: 1.0
+# Description: A guide for connecting all software modules to build the final application.
+
+metadata:
+  name: MainIntegration
+  version: "1.0.0"
+  author: "Agentic AI Development"
+
+spec:
+  description: "This plan outlines the primary data flows and event-driven interactions between the independent modules to achieve the final software functionality."
+
+  architecture:
+    - type: "Modular, event-driven architecture."
+    - core_component: "The UserInterface module acts as the central controller or orchestrator."
+    - data_hub: "The GraphEngine module serves as the single source of truth for the current graph state."
+
+  integration_flow:
+    - flow: "Initial Data Import"
+      steps:
+        - "1. User clicks 'Import Data' in the `UserInterface`."
+        - "2. `UserInterface` launches the import wizard, which calls the `DataModelImport` API."
+        - "3. `DataModelImport` processes the file and returns a standardized graph object."
+        - "4. `UserInterface` receives the graph object and sends it to the `GraphEngine` to be stored."
+        - "5. `UserInterface` then requests the `GraphVisualization` module to render the graph received from the `GraphEngine`."
+
+    - flow: "Running an Analysis"
+      steps:
+        - "1. User selects an algorithm and parameters in the `UserInterface`'s analysis panel."
+        - "2. `UserInterface` calls the `GraphAnalytics` API, passing the algorithm name, parameters, and the current graph data from the `GraphEngine`."
+        - "3. `GraphAnalytics` performs the calculation and returns the results, including an optional `visualMapping` suggestion."
+        - "4. `UserInterface` displays the raw results and applies the `visualMapping` to the `GraphVisualization` module's configuration."
+        - "5. `UserInterface` triggers a re-render in `GraphVisualization` to show the highlighted results."
+
+    - flow: "User Interaction with the Graph"
+      steps:
+        - "1. User clicks on a node in the `GraphVisualization` canvas."
+        - "2. `GraphVisualization` fires an `onNodeClick` event containing the `nodeId`."
+        - "3. The `UserInterface` listens for this event."
+        - "4. `UserInterface` fetches the full data for the clicked node from the `GraphEngine`."
+        - "5. `UserInterface` populates its 'Details-on-Demand' panel with the node's attributes."
+
+    - flow: "Saving a Project"
+      steps:
+        - "1. User clicks 'Save' in the `UserInterface`."
+        - "2. `UserInterface` gathers the current state: graph data from `GraphEngine`, visual config from `GraphVisualization`, etc."
+        - "3. `UserInterface` bundles this data into a single object and calls the `DataPersistence` API to save it to a file."
+
+  startup_sequence:
+    - "1. Initialize all modules."
+    - "2. The `UserInterface` presents the main window."
+    - "3. The application is in a ready state, waiting for the user to either load a project or import new data."
+
+  communication_protocol:
+    - "Internal communication should primarily be through RESTful API calls (for request-response) and a pub/sub event system (for broadcasting state changes)."
+    - "The `UserInterface` subscribes to events from other modules and calls their APIs in response to user actions."
