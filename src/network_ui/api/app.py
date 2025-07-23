@@ -11,6 +11,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import numpy as np
+from werkzeug.exceptions import BadRequest, UnsupportedMediaType
 
 # Import from the new package structure
 from ..core import DataImporter, ImportConfig
@@ -85,8 +86,20 @@ def create_app(config=None):
             skip_rows = data.get('skipRows', 0)
             max_rows = data.get('maxRows')
 
-            if not file_path:
+            if not file_path or file_path.strip() == '':
                 return jsonify({'error': 'File path is required'}), 400
+                
+            # Check for potentially dangerous path patterns
+            # Allow absolute paths for testing but prevent directory traversal
+            if '..' in file_path:
+                return jsonify({'error': 'Directory traversal not allowed'}), 400
+            
+            # Check if file exists (basic validation)
+            if not os.path.exists(file_path):
+                return jsonify({'error': 'Invalid file path'}), 400
+                
+            if mapping_config is None:
+                return jsonify({'error': 'Mapping configuration is required'}), 400
 
             # Create import configuration
             config = ImportConfig(
@@ -143,6 +156,12 @@ def create_app(config=None):
             else:
                 return jsonify(response), 400
 
+        except BadRequest as e:
+            logger.warning(f"Bad request in import endpoint: {str(e)}")
+            return jsonify({'error': 'Invalid JSON format or request structure'}), 400
+        except UnsupportedMediaType as e:
+            logger.warning(f"Unsupported media type in import endpoint: {str(e)}")
+            return jsonify({'error': 'Content-Type must be application/json'}), 415
         except Exception as e:
             logger.error(f"Error in import endpoint: {str(e)}")
             return jsonify({'error': str(e)}), 500
@@ -173,6 +192,9 @@ def create_app(config=None):
             preview = convert_to_json_serializable(preview)
             return jsonify(preview)
 
+        except BadRequest as e:
+            logger.warning(f"Bad request in preview endpoint: {str(e)}")
+            return jsonify({'error': 'Invalid JSON format or request structure'}), 400
         except Exception as e:
             logger.error(f"Error in preview endpoint: {str(e)}")
             return jsonify({'error': str(e)}), 500
@@ -203,6 +225,9 @@ def create_app(config=None):
             ui_config = convert_to_json_serializable(ui_config)
             return jsonify(ui_config)
 
+        except BadRequest as e:
+            logger.warning(f"Bad request in mapping-config endpoint: {str(e)}")
+            return jsonify({'error': 'Invalid JSON format or request structure'}), 400
         except Exception as e:
             logger.error(f"Error in mapping-config endpoint: {str(e)}")
             return jsonify({'error': str(e)}), 500
@@ -221,6 +246,10 @@ def create_app(config=None):
 
             if not allowed_file(file.filename):
                 return jsonify({'error': 'File type not allowed'}), 400
+
+            # Check for path traversal attempts
+            if '..' in file.filename or '/' in file.filename or '\\' in file.filename:
+                return jsonify({'error': 'Invalid filename - path traversal not allowed'}), 400
 
             # Secure filename and save
             filename = secure_filename(file.filename)

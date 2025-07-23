@@ -42,14 +42,14 @@ class DataValidator:
         if self._is_boolean_column(clean_data):
             return 'boolean'
 
-        # Check for datetime types
+        # Check for datetime/date types first (before numeric to avoid timestamp detection)
         if self._is_datetime_column(clean_data):
             return 'datetime'
-
+            
         if self._is_date_column(clean_data):
             return 'date'
 
-        # Check for numeric types
+        # Check for numeric types (after datetime to avoid timestamp false positives)
         if self._is_numeric_column(clean_data):
             if self._is_integer_column(clean_data):
                 return 'integer'
@@ -67,19 +67,54 @@ class DataValidator:
 
     def _is_datetime_column(self, data: pd.Series) -> bool:
         """Check if column contains datetime values."""
+        # Check if already datetime type
+        if pd.api.types.is_datetime64_any_dtype(data):
+            return True
+        
+        # Don't try to parse purely numeric data as datetime
+        if pd.api.types.is_numeric_dtype(data):
+            return False
+            
         try:
+            # First try with default parsing
             pd.to_datetime(data, errors='raise')
             return True
         except (ValueError, TypeError):
-            return False
+            try:
+                # Try with ISO8601 format specifically with UTC timezone handling
+                pd.to_datetime(data, errors='raise', format='ISO8601', utc=True)
+                return True
+            except (ValueError, TypeError):
+                try:
+                    # Try with mixed format parsing
+                    pd.to_datetime(data, errors='raise', format='mixed')
+                    return True
+                except (ValueError, TypeError):
+                    return False
 
     def _is_date_column(self, data: pd.Series) -> bool:
         """Check if column contains date values."""
         try:
-            pd.to_datetime(data, errors='raise')
-            # Check if all values are dates (no time component)
+            # Try to parse as datetime first
             parsed_dates = pd.to_datetime(data, errors='coerce')
-            return all(pd.notna(parsed_dates))
+            if not all(pd.notna(parsed_dates)):
+                return False
+
+            # Check if all values are dates (no time component)
+            # Convert to string and check if they match date patterns
+            date_strings = data.astype(str)
+            date_patterns = [
+                r'^\d{4}-\d{2}-\d{2}$',  # YYYY-MM-DD
+                r'^\d{2}/\d{2}/\d{4}$',  # MM/DD/YYYY
+                r'^\d{4}/\d{2}/\d{2}$',  # YYYY/MM/DD
+            ]
+
+            import re
+            for pattern in date_patterns:
+                if all(re.match(pattern, date_str) for date_str in date_strings):
+                    return True
+
+            return False
         except (ValueError, TypeError):
             return False
 
@@ -123,8 +158,8 @@ class DataValidator:
             # For edge data, require edge_source and edge_target
             required_mappings = ['edge_source', 'edge_target']
         else:
-            # For node data, require node_id and node_name
-            required_mappings = ['node_id', 'node_name']
+            # For node data, require only node_id (node_name is optional)
+            required_mappings = ['node_id']
 
         for required in required_mappings:
             if required not in mapping_config:
@@ -178,6 +213,12 @@ class DataValidator:
                 errors.append(f"Column '{column}' not found in data")
                 continue
 
+            # Validate that the expected_type is supported
+            if expected_type not in self.SUPPORTED_TYPES:
+                errors.append(f"Unsupported data type '{expected_type}' for column '{column}'. "
+                            f"Supported types: {list(self.SUPPORTED_TYPES.keys())}")
+                continue
+
             try:
                 if expected_type == 'integer':
                     pd.to_numeric(data[column], errors='raise').astype(int)
@@ -212,17 +253,34 @@ class DataValidator:
         Validate that the file format is supported.
 
         Args:
-            file_path: Path to the file
+            file_path: Path to the file or file extension
 
         Returns:
             Tuple[bool, str]: (is_valid, error_message)
         """
+        if file_path is None or file_path == '':
+            return False, "File path is empty or None"
+        
         supported_extensions = ['.csv', '.json', '.xml']
+        supported_formats = ['csv', 'json', 'xml']
+        
+        # Check if the input itself is a supported format (without dot)
+        if file_path.lower() in supported_formats:
+            return True, ""
+        
+        # Handle case where file_path doesn't have an extension
+        if '.' not in file_path:
+            return False, f"No file extension found. Supported formats: {supported_formats}"
+        
+        # Extract the file extension
         file_extension = file_path.lower().split('.')[-1]
-
-        if f'.{file_extension}' not in supported_extensions:
+        
+        # Check if it's a supported extension
+        if f'.{file_extension}' in supported_extensions or file_extension in supported_formats:
+            return True, ""
+        else:
             return False, (f"Unsupported file format: {file_extension}. "
-                          f"Supported formats: {supported_extensions}")
+                          f"Supported formats: {supported_formats}")
 
         return True, ""
 
@@ -244,7 +302,10 @@ class DataValidator:
             'is_valid': True,
             'errors': [],
             'warnings': [],
-            'data_summary': {},
+            'data_quality': {},
+            'mapping_validation': {},
+            'recommendations': [],
+            'summary': {},
             'type_detection': {}
         }
 
@@ -269,20 +330,41 @@ class DataValidator:
                     f"Column '{column}': detected type '{detected_type}' "
                     f"differs from specified type '{data_types[column]}'")
 
-        # Create data summary
-        report['data_summary'] = {
+        # Create data quality metrics
+        report['data_quality'] = {
+            'total_rows': len(data),
+            'total_columns': len(data.columns),
+            'null_counts': data.isnull().sum().to_dict(),
+            'data_types': report['type_detection'],
+            'duplicate_counts': {col: data[col].duplicated().sum() for col in data.columns}
+        }
+
+        # Create mapping validation section
+        report['mapping_validation'] = {
+            'is_valid': mapping_valid,
+            'errors': mapping_errors,
+            'warnings': []
+        }
+
+        # Create summary
+        report['summary'] = {
             'total_rows': len(data),
             'total_columns': len(data.columns),
             'missing_values': data.isnull().sum().to_dict(),
             'unique_values': {col: data[col].nunique() for col in data.columns}
         }
 
-        # Check for potential issues
+        # Generate recommendations and warnings
         if len(data) == 0:
-            report['warnings'].append("Data file is empty")
-
+            report['recommendations'].append("Data file is empty")
+            report['warnings'].append("Empty data file - no data to process")
         if len(data.columns) == 0:
-            report['warnings'].append("Data file has no columns")
+            report['recommendations'].append("Data file has no columns")
+            report['warnings'].append("No columns found in data file")
+        if len(report['errors']) > 0:
+            report['recommendations'].append("Fix validation errors before proceeding")
+        if len(report['warnings']) > 0:
+            report['recommendations'].append("Review warnings for potential issues")
 
         # Set overall validity
         report['is_valid'] = len(report['errors']) == 0

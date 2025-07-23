@@ -1,5 +1,4 @@
 """
-API tests for the Network UI platform.
-
-This module contains tests for the Flask API endpoints.
+API Tests Module
+Tests for the Flask API endpoints and functionality.
 """ 

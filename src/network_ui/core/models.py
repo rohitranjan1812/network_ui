@@ -11,19 +11,29 @@ import uuid
 
 @dataclass
 class Node:
-    """Represents a node in the graph with hierarchical KPI structure."""
+    """Represents a node in the graph with hierarchical KPI structure and visual properties."""
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     name: str = ""
     level: int = 1
     kpis: Dict[str, Any] = field(default_factory=dict)
     attributes: Dict[str, Any] = field(default_factory=dict)
     position: Optional[Dict[str, float]] = None
+    # Spec 2 additions: Visual properties for graph visualization
+    visual_properties: Dict[str, Any] = field(default_factory=dict)
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
 
     def __post_init__(self):
         if not self.position:
             self.position = {"x": 0.0, "y": 0.0}
+        
+        # Initialize default visual properties if not set (Spec 2)
+        if not self.visual_properties:
+            self.visual_properties = {
+                "size": 10.0,
+                "color": "#3498db",
+                "shape": "circle"
+            }
 
 
 @dataclass
@@ -65,8 +75,8 @@ class GraphData:
 
     def get_edges_by_node(self, node_id: str) -> List[Edge]:
         """Get all edges connected to a specific node."""
-        return [edge for edge in self.edges if edge.source ==
-                node_id or edge.target == node_id]
+        return [edge for edge in self.edges 
+                if edge.source == node_id or edge.target == node_id]
 
 
 @dataclass

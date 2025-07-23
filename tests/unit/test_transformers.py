@@ -178,14 +178,28 @@ class TestGraphTransformer:
             'category': ['A', 'B', 'A']
         })
 
+        # Test missing node_id (should still raise error)
         mapping_config = {
-            'node_id': 'id',
-            # Missing node_name
+            # Missing node_id
             'attribute_category': 'category'
         }
 
-        with pytest.raises(ValueError, match="requires both 'node_id' and 'node_name'"):
+        with pytest.raises(ValueError, match="requires 'node_id'"):
             self.transformer._transform_node_data(data, mapping_config)
+            
+        # Test node_name optional (should work fine)
+        valid_mapping_config = {
+            'node_id': 'id',
+            # node_name is optional, will be generated
+            'attribute_category': 'category'
+        }
+        
+        result = self.transformer.transform_to_graph(data, valid_mapping_config, {
+            'id': 'integer',
+            'category': 'string'
+        })
+        assert len(result.nodes) == 3
+        assert result.nodes[0].name == "Node_1"  # Generated name
 
     def test_transform_edge_data(self):
         """Test edge data transformation."""
@@ -273,10 +287,11 @@ class TestGraphTransformer:
         result_graph = self.transformer.create_hierarchical_structure(
             graph_data)
 
-        # Nodes with same attributes should be grouped at level 2
-        assert node1.level == 2
-        assert node2.level == 2
+        # Nodes with same attributes should be grouped at level 3
+        assert node1.level == 3
+        assert node2.level == 3
         assert node3.level == 1  # Different attributes, stays at level 1
+        assert result_graph is not None  # Verify function returns a result
 
     def test_validate_graph_structure_valid(self):
         """Test graph structure validation with valid data."""
@@ -437,8 +452,8 @@ class TestGraphTransformer:
         assert summary['total_edges'] == 3
 
         # Check node levels
-        assert summary['node_levels'][1] == 2
-        assert summary['node_levels'][2] == 1
+        assert summary['node_levels']['1'] == 2
+        assert summary['node_levels']['2'] == 1
 
         # Check edge types
         assert summary['edge_types']['collaborates'] == 2

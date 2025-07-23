@@ -1,5 +1,4 @@
 """
-Integration tests for the Network UI platform.
-
-This module contains tests that verify the integration between different components.
+Integration Tests Module
+Tests for component integration and end-to-end workflows.
 """ 

@@ -255,4 +255,4 @@ class TestComponentIntegration:
         assert 'columns' in ui_config
         assert 'detected_types' in ui_config
         assert 'suggestions' in ui_config
-        assert 'supported_types' in ui_config 
+        assert 'current_mapping' in ui_config 

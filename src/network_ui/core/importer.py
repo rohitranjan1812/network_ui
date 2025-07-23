@@ -53,8 +53,7 @@ class DataImporter:
 
         try:
             self.logger.info(
-                f"Starting import process for file: {
-                    config.file_path}")
+                f"Starting import process for file: {config.file_path}")
 
             # Validate file format
             is_valid, error_msg = self.validator.validate_file_format(
@@ -71,6 +70,15 @@ class DataImporter:
 
             result.total_rows = len(data)
             self.logger.info(f"Successfully read {len(data)} rows from file")
+
+            # Check for empty data
+            if len(data) == 0:
+                result.warnings.append("Empty data file - no nodes or edges created")
+                result.success = True
+                result.graph_data = GraphData()
+                result.processed_rows = 0
+                result.import_log = self._create_import_log(config, {'is_valid': True, 'warnings': result.warnings, 'errors': []}, result.graph_data)
+                return result
 
             # Create default mapping if not provided
             if not config.mapping_config:
@@ -155,11 +163,18 @@ class DataImporter:
 
         try:
             if file_extension == 'csv':
+                # Handle skip_rows correctly - skip data rows but keep header
+                if config.skip_rows and config.skip_rows > 0:
+                    # Skip rows 1 through skip_rows (keeping row 0 as header)
+                    skiprows = list(range(1, config.skip_rows + 1))
+                else:
+                    skiprows = None
+                
                 return pd.read_csv(
                     file_path,
                     encoding=config.file_encoding,
                     delimiter=config.delimiter,
-                    skiprows=config.skip_rows,
+                    skiprows=skiprows,
                     nrows=config.max_rows
                 )
 
@@ -238,7 +253,7 @@ class DataImporter:
                     record[child.tag] = child.text
                 # Also include attributes
                 for attr_name, attr_value in element.attrib.items():
-                    record[f"@{attr_name}"] = attr_value
+                    record[attr_name] = attr_value
                 records.append(record)
 
             return pd.DataFrame(records)

@@ -2,7 +2,7 @@
 Comprehensive tests for data models.
 """
 
-import pytest
+import uuid
 from datetime import datetime
 from network_ui.core.models import Node, Edge, GraphData, ImportConfig, ImportResult
 

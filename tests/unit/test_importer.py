@@ -4,9 +4,10 @@ Comprehensive tests for the main data importer.
 
 import os
 import tempfile
-import json
-from network_ui.core.importer import DataImporter
-from network_ui.core.models import ImportConfig
+import pytest
+from unittest.mock import patch, MagicMock
+from network_ui.core import DataImporter, ImportConfig
+from network_ui.core.models import GraphData, Node, Edge
 
 
 class TestDataImporter:
@@ -246,7 +247,7 @@ class TestDataImporter:
             mapping_config={
                 "node_id": "id",
                 "node_name": "name",
-                "attribute_category": "category"
+                "attribute_type": "type"
             }
         )
 
@@ -263,8 +264,8 @@ class TestDataImporter:
             file_path="data/test_data/test_data.csv",
             skip_rows=1,  # Skip header only
             mapping_config={
-                "node_id": "1",  # First row becomes column names
-                "node_name": "Marketing Team A"
+                "node_id": "id",  # Use actual column names
+                "node_name": "name"
             }
         )
 

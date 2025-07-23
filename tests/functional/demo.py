@@ -205,6 +205,8 @@ def main():
 
     if node_graph:
         demo_graph_summary(node_graph)
+    if edge_graph:
+        demo_graph_summary(edge_graph)
 
     print("\n" + "=" * 50)
     print("Demo completed!")
