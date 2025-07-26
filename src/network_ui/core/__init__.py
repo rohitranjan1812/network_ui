@@ -12,12 +12,12 @@ from .transformers import GraphTransformer
 
 __all__ = [
     'DataImporter',
-    'ImportConfig',
-    'Node',
-    'Edge',
-    'GraphData',
-    'ImportResult',
-    'DataValidator',
-    'DataMapper',
-    'GraphTransformer'
+        'ImportConfig',
+        'Node',
+        'Edge',
+        'GraphData',
+        'ImportResult',
+        'DataValidator',
+        'DataMapper',
+        'GraphTransformer'
 ]

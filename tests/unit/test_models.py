@@ -2,7 +2,6 @@
 Comprehensive tests for data models.
 """
 
-import uuid
 from datetime import datetime
 from network_ui.core.models import Node, Edge, GraphData, ImportConfig, ImportResult
 
@@ -199,7 +198,7 @@ class TestImportConfig:
         config = ImportConfig(file_path="test.csv")
 
         assert config.file_path == "test.csv"
-        assert config.file_encoding == "utf-8"
+        assert config.file_encoding == "utf - 8"
         assert config.mapping_config == {}
         assert config.data_types == {}
         assert config.delimiter == ","
@@ -210,7 +209,7 @@ class TestImportConfig:
         """Test import config creation with all fields."""
         config = ImportConfig(
             file_path="test.csv",
-            file_encoding="latin-1",
+            file_encoding="latin - 1",
             mapping_config={"node_id": "id"},
             data_types={"id": "integer"},
             delimiter=";",
@@ -219,7 +218,7 @@ class TestImportConfig:
         )
 
         assert config.file_path == "test.csv"
-        assert config.file_encoding == "latin-1"
+        assert config.file_encoding == "latin - 1"
         assert config.mapping_config == {"node_id": "id"}
         assert config.data_types == {"id": "integer"}
         assert config.delimiter == ";"

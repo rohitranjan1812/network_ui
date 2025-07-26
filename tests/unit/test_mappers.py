@@ -2,7 +2,6 @@
 Comprehensive tests for data mappers.
 """
 
-import pytest
 import pandas as pd
 from network_ui.core.mappers import DataMapper
 
@@ -86,7 +85,7 @@ class TestDataMapper:
             'name': ['a', 'b', 'c'],
             'score': [1.5, 2.7, 3.1],
             'active': ['true', 'false', 'true'],
-            'date': ['2024-01-01', '2024-01-02', '2024-01-03']
+            'date': ['2024 - 01 - 01', '2024 - 01 - 02', '2024 - 01 - 03']
         })
 
         detected_types = self.mapper.detect_data_types(data)
@@ -221,7 +220,7 @@ class TestDataMapper:
         # Check name suggestions
         assert 'name' in suggestions['node_name']
 
-        # Check source/target suggestions
+        # Check source / target suggestions
         assert 'source' in suggestions['edge_source']
         assert 'target' in suggestions['edge_target']
 
@@ -256,7 +255,7 @@ class TestDataMapper:
     def test_convert_to_boolean(self):
         """Test boolean conversion."""
         data = pd.Series(['true', 'false', 'yes', 'no',
-                         '1', '0', 't', 'f', 'y', 'n'])
+                         '1', '0', 't', '', 'y', 'n'])
         converted = self.mapper._convert_to_boolean(data)
 
         expected = [

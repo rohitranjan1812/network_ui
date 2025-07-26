@@ -1,10 +1,11 @@
+import pytest
 """
+import pytest
 Integration tests for the Network UI platform.
 
 These tests verify that different components work together correctly.
 """
 
-import pytest
 import pandas as pd
 from network_ui.core import DataImporter, ImportConfig
 from network_ui.core.models import GraphData
@@ -174,7 +175,7 @@ class TestComponentIntegration:
 
         assert isinstance(graph_data, GraphData)
         assert len(graph_data.edges) == 3
-        assert len(graph_data.nodes) == 3  # Should create nodes for sources/targets
+        assert len(graph_data.nodes) == 3  # Should create nodes for sources / targets
 
     def test_validation_pipeline_integration(self):
         """Test validation pipeline integration."""
@@ -255,4 +256,4 @@ class TestComponentIntegration:
         assert 'columns' in ui_config
         assert 'detected_types' in ui_config
         assert 'suggestions' in ui_config
-        assert 'current_mapping' in ui_config 
+        assert 'current_mapping' in ui_config

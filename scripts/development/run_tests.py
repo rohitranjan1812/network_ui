@@ -86,6 +86,9 @@ def check_test_files():
     """Check if required test files exist."""
     print("\n🔍 Checking test files...")
     
+    # Define the test data directory
+    test_data_dir = Path(__file__).parent.parent.parent / "data" / "test_data"
+    
     required_files = [
         'test_data.csv',
         'test_edges.csv',
@@ -99,7 +102,8 @@ def check_test_files():
     missing_files = []
     
     for file in required_files:
-        if os.path.exists(file):
+        file_path = test_data_dir / file
+        if file_path.exists():
             print(f"✅ {file}")
         else:
             print(f"❌ {file} - MISSING")

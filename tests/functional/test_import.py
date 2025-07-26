@@ -3,8 +3,8 @@ Test script for the Data Model Import functionality.
 Demonstrates how to use the import module to process data files.
 """
 
-import os
 import pytest
+import os
 from network_ui.core import DataImporter, ImportConfig
 
 
@@ -22,7 +22,7 @@ class TestFunctionalImport:
         # Create import configuration for nodes
         config = ImportConfig(
             file_path="test_data.csv",
-            file_encoding="utf-8",
+            file_encoding="utf - 8",
             mapping_config={
                 "node_id": "id",
                 "node_name": "name",
@@ -59,8 +59,8 @@ class TestFunctionalImport:
             for i, node in enumerate(result.graph_data.nodes[:3]):
                 print(f"   Node {i + 1}: {node.name} (ID: {node.id})")
                 print(f"     - Level: {node.level}")
-                print(f"     - Category: {node.attributes.get('category', 'N/A')}")
-                print(f"     - Performance: {node.kpis.get('performance', 'N/A')}")
+                print(f"     - Category: {node.attributes.get('category', 'N / A')}")
+                print(f"     - Performance: {node.kpis.get('performance', 'N / A')}")
 
             return result.graph_data
         else:
@@ -79,7 +79,7 @@ class TestFunctionalImport:
         # Create import configuration for edges
         config = ImportConfig(
             file_path="test_edges.csv",
-            file_encoding="utf-8",
+            file_encoding="utf - 8",
             mapping_config={
                 "edge_source": "source",
                 "edge_target": "target",
@@ -113,8 +113,8 @@ class TestFunctionalImport:
                 print(f"   Edge {i + 1}: {edge.source} -> {edge.target}")
                 print(f"     - Type: {edge.relationship_type}")
                 print(f"     - Weight: {edge.weight}")
-                print(f"     - Collaboration: "
-                      f"{edge.kpi_components.get('collaboration', 'N/A')}")
+                print("     - Collaboration: "
+                      f"{edge.kpi_components.get('collaboration', 'N / A')}")
 
             return result.graph_data
         else:

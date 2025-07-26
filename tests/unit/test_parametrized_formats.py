@@ -3,9 +3,9 @@ Parametrized Test Cases for All Data Formats
 Tests all supported data formats with various configurations and edge cases.
 """
 
+import pytest
 import os
 import tempfile
-import pytest
 import pandas as pd
 import numpy as np
 import json
@@ -40,15 +40,15 @@ class TestParametrizedDataFormats:
         ('json', 1000, 'utf-8'),
         ('xml', 10, 'utf-8'),
         ('xml', 100, 'utf-8'),
-    ])
+            ])
     def test_format_size_encoding_combinations(self, file_format, data_size, encoding):
         """Test all combinations of file formats, sizes, and encodings."""
         # Generate test data
         test_data = self._generate_test_data(data_size)
-        
+
         # Create file in specified format and encoding
         file_path = self._create_test_file(test_data, file_format, encoding)
-        
+
         config = ImportConfig(
             file_path=file_path,
             file_encoding=encoding,
@@ -59,10 +59,10 @@ class TestParametrizedDataFormats:
                 'attribute_value': 'value'
             }
         )
-        
+
         # Import and verify
         result = self.importer.import_data(config)
-        
+
         # All combinations should work for small to medium datasets
         if data_size <= 1000:
             assert result.success is True
@@ -79,7 +79,7 @@ class TestParametrizedDataFormats:
         (',', "'", '\\'),
         (',', '"', '/'),
         (':', '"', '\\'),
-    ])
+            ])
     def test_csv_delimiter_combinations(self, delimiter, quote_char, escape_char):
         """Test CSV files with different delimiter, quote, and escape character combinations."""
         test_data = [
@@ -87,14 +87,14 @@ class TestParametrizedDataFormats:
             {'id': 2, 'name': f'Node{quote_char}2{quote_char}', 'description': 'Text with quotes'},
             {'id': 3, 'name': 'Node 3', 'description': f'Text with {escape_char} escape'},
         ]
-        
+
         # Create CSV with specific formatting
         file_path = os.path.join(self.temp_dir, 'custom_format.csv')
-        
+
         with open(file_path, 'w', encoding='utf-8') as f:
             # Write header
             f.write(f'id{delimiter}name{delimiter}description\n')
-            
+
             # Write data with proper quoting and escaping
             for row in test_data:
                 escaped_desc = row['description'].replace(escape_char, escape_char + escape_char)
@@ -111,7 +111,7 @@ class TestParametrizedDataFormats:
         )
 
         result = self.importer.import_data(config)
-        
+
         # Should handle custom formatting correctly
         assert result.success is True
         assert len(result.graph_data.nodes) == 3
@@ -121,13 +121,13 @@ class TestParametrizedDataFormats:
         ({'id': 'integer', 'name': 'string', 'value': 'float', 'active': 'boolean'}, True),
         ({'id': 'integer', 'name': 'string', 'created': 'date', 'updated': 'datetime'}, True),
         ({'id': 'string', 'name': 'string', 'score': 'float'}, True),
-        
+
         # Mixed valid types
         ({'id': 'integer', 'name': 'string', 'mixed': 'string'}, True),  # Let string handle mixed data
-        
+
         # Edge case: All strings
         ({'id': 'string', 'name': 'string', 'value': 'string'}, True),
-        
+
         # Invalid combinations (should still work but with warnings)
         ({'id': 'float', 'name': 'string'}, True),  # Unusual but not impossible
     ])
@@ -139,13 +139,13 @@ class TestParametrizedDataFormats:
             'name': ['Node1', 'Node2', 'Node3', 'Node4', 'Node5'],
             'value': [1.5, 2.7, 3.14, 4.2, 5.9],
             'active': [True, False, True, False, True],
-            'created': ['2024-01-01', '2024-01-02', '2024-01-03', '2024-01-04', '2024-01-05'],
-            'updated': ['2024-01-01 10:00:00', '2024-01-02 11:00:00', '2024-01-03 12:00:00', 
-                       '2024-01-04 13:00:00', '2024-01-05 14:00:00'],
+            'created': ['2024 - 01 - 01', '2024 - 01 - 02', '2024 - 01 - 03', '2024 - 01 - 04', '2024 - 01 - 05'],
+            'updated': ['2024 - 01 - 01 10:00:00', '2024 - 01 - 02 11:00:00', '2024 - 01 - 03 12:00:00',
+                       '2024 - 01 - 04 13:00:00', '2024 - 01 - 05 14:00:00'],
             'score': [85.5, 92.3, 78.9, 88.7, 95.1],
             'mixed': ['text1', 'text2', 'text3', 'text4', 'text5']
         }
-        
+
         df = pd.DataFrame(test_data)
         file_path = os.path.join(self.temp_dir, 'data_types_test.csv')
         df.to_csv(file_path, index=False)
@@ -159,7 +159,7 @@ class TestParametrizedDataFormats:
                 mapping_config['node_name'] = col
             else:
                 mapping_config[f'attribute_{col}'] = col
-        
+
         # Ensure node_name is always included if not already present
         if 'node_name' not in mapping_config and 'name' in test_data:
             mapping_config['node_name'] = 'name'
@@ -171,7 +171,7 @@ class TestParametrizedDataFormats:
         )
 
         result = self.importer.import_data(config)
-        
+
         if should_succeed:
             assert result.success is True
             assert len(result.graph_data.nodes) == 5
@@ -208,7 +208,7 @@ class TestParametrizedDataFormats:
         )
 
         result = self.importer.import_data(config)
-        
+
         # The importer should handle skip_rows and max_rows correctly
         if result.success:
             assert len(result.graph_data.nodes) == expected_result
@@ -221,9 +221,9 @@ class TestParametrizedDataFormats:
         'attributes',  # Node + multiple attributes
         'kpis',       # Node + multiple KPIs
         'mixed',      # Node + attributes + KPIs
-        'hierarchical', # Node + level information
+        'hierarchical',  # Node + level information
         'edges',      # Edge mapping
-        'complex_edges' # Edges with attributes and KPIs
+        'complex_edges'  # Edges with attributes and KPIs
     ])
     def test_mapping_complexity_levels(self, mapping_complexity):
         """Test different levels of mapping complexity."""
@@ -237,8 +237,8 @@ class TestParametrizedDataFormats:
         else:
             # Create node data
             test_data = [
-                {'id': i, 'name': f'Node{i}', 'category': f'Cat{i%3}', 'level': i%5+1,
-                 'kpi1': i*10, 'kpi2': i*20, 'attr1': f'val{i}', 'attr2': f'data{i}'}
+                {'id': i, 'name': f'Node{i}', 'category': f'Cat{i % 3}', 'level': i % 5 + 1,
+                 'kpi1': i * 10, 'kpi2': i * 20, 'attr1': f'val{i}', 'attr2': f'data{i}'}
                 for i in range(1, 11)
             ]
 
@@ -297,9 +297,9 @@ class TestParametrizedDataFormats:
         )
 
         result = self.importer.import_data(config)
-        
+
         assert result.success is True
-        
+
         if mapping_complexity in ['edges', 'complex_edges']:
             assert len(result.graph_data.edges) == 3
             assert len(result.graph_data.nodes) == 3  # Nodes created from edges
@@ -354,7 +354,7 @@ class TestParametrizedDataFormats:
         )
 
         result = self.importer.import_data(config)
-        
+
         # Should handle JSON structure appropriately
         # Note: Current implementation might not handle all structures perfectly
         assert result.success is True or len(result.errors) > 0
@@ -375,7 +375,7 @@ class TestParametrizedDataFormats:
     <node id="2" name="Node2" category="B"/>
     <node id="3" name="Node3" category="C"/>
 </root>''',
-            
+
             'mixed_content': '''<?xml version="1.0"?>
 <root>
     <node id="1">
@@ -387,7 +387,7 @@ class TestParametrizedDataFormats:
         <category>B</category>
     </node>
 </root>''',
-            
+
             'nested_elements': '''<?xml version="1.0"?>
 <root>
     <data>
@@ -403,7 +403,7 @@ class TestParametrizedDataFormats:
         </nodes>
     </data>
 </root>''',
-            
+
             'cdata_content': '''<?xml version="1.0"?>
 <root>
     <node id="1">
@@ -411,9 +411,9 @@ class TestParametrizedDataFormats:
         <description><![CDATA[Description with <tags> and & symbols]]></description>
     </node>
 </root>''',
-            
+
             'namespaced': '''<?xml version="1.0"?>
-<root xmlns:ns="http://example.com/namespace">
+<root xmlns:ns="http://example.com / namespace">
     <ns:node ns:id="1" ns:name="Node1"/>
     <ns:node ns:id="2" ns:name="Node2"/>
 </root>'''
@@ -432,7 +432,7 @@ class TestParametrizedDataFormats:
         )
 
         result = self.importer.import_data(config)
-        
+
         # XML parsing might not be fully implemented for all structures
         # Should either work or fail gracefully
         assert result.success is True or len(result.errors) > 0
@@ -450,7 +450,7 @@ class TestParametrizedDataFormats:
     def test_error_handling_scenarios(self, error_scenario):
         """Test various error handling scenarios."""
         config = None
-        
+
         if error_scenario == 'missing_required_columns':
             # Create file without required columns
             test_data = [{'wrong_col': 1, 'another_col': 'data'}]
@@ -459,7 +459,7 @@ class TestParametrizedDataFormats:
                 file_path=file_path,
                 mapping_config={'node_id': 'id', 'node_name': 'name'}  # Columns don't exist
             )
-            
+
         elif error_scenario == 'empty_file':
             # Create empty file
             file_path = os.path.join(self.temp_dir, 'empty.csv')
@@ -469,7 +469,7 @@ class TestParametrizedDataFormats:
                 file_path=file_path,
                 mapping_config={'node_id': 'id', 'node_name': 'name'}
             )
-            
+
         elif error_scenario == 'invalid_json_syntax':
             # Create invalid JSON
             file_path = os.path.join(self.temp_dir, 'invalid.json')
@@ -479,7 +479,7 @@ class TestParametrizedDataFormats:
                 file_path=file_path,
                 mapping_config={'node_id': 'id', 'node_name': 'name'}
             )
-            
+
         elif error_scenario == 'invalid_xml_syntax':
             # Create invalid XML
             file_path = os.path.join(self.temp_dir, 'invalid.xml')
@@ -489,17 +489,17 @@ class TestParametrizedDataFormats:
                 file_path=file_path,
                 mapping_config={'node_id': 'id', 'node_name': 'name'}
             )
-            
+
         elif error_scenario == 'unsupported_encoding':
             # Create file with problematic encoding
             test_data = self._generate_test_data(5)
             file_path = self._create_test_file(test_data, 'csv', 'utf-8')
             config = ImportConfig(
                 file_path=file_path,
-                file_encoding='invalid-encoding',  # Unsupported encoding
+                file_encoding='invalid - encoding',  # Unsupported encoding
                 mapping_config={'node_id': 'id', 'node_name': 'name'}
             )
-            
+
         elif error_scenario == 'permission_denied':
             # Mock permission error
             file_path = os.path.join(self.temp_dir, 'test.csv')
@@ -507,7 +507,7 @@ class TestParametrizedDataFormats:
                 file_path=file_path,
                 mapping_config={'node_id': 'id', 'node_name': 'name'}
             )
-            
+
         elif error_scenario == 'corrupted_data':
             # Create file with corrupted binary data
             file_path = os.path.join(self.temp_dir, 'corrupted.csv')
@@ -520,7 +520,7 @@ class TestParametrizedDataFormats:
 
         if config:
             result = self.importer.import_data(config)
-            
+
             # Handle different error scenarios
             if error_scenario == 'corrupted_data':
                 # Corrupted data may be read as empty, which is now handled gracefully
@@ -550,28 +550,28 @@ class TestParametrizedDataFormats:
     def _create_test_file(self, data, file_format, encoding):
         """Create test file in specified format and encoding."""
         if file_format == 'csv':
-            file_path = os.path.join(self.temp_dir, f'test_data.csv')
+            file_path = os.path.join(self.temp_dir, 'test_data.csv')
             df = pd.DataFrame(data)
             df.to_csv(file_path, index=False, encoding=encoding)
-            
+
         elif file_format == 'json':
-            file_path = os.path.join(self.temp_dir, f'test_data.json')
+            file_path = os.path.join(self.temp_dir, 'test_data.json')
             with open(file_path, 'w', encoding=encoding) as f:
                 json.dump(data, f, indent=2)
-                
+
         elif file_format == 'xml':
-            file_path = os.path.join(self.temp_dir, f'test_data.xml')
+            file_path = os.path.join(self.temp_dir, 'test_data.xml')
             root = ET.Element('root')
-            
+
             for item in data:
                 elem = ET.SubElement(root, 'item')
                 for key, value in item.items():
                     elem.set(key, str(value))
-            
+
             tree = ET.ElementTree(root)
             tree.write(file_path, encoding=encoding, xml_declaration=True)
-            
+
         else:
             raise ValueError(f"Unsupported format: {file_format}")
-            
-        return file_path 
+
+        return file_path

@@ -15,6 +15,8 @@ from werkzeug.exceptions import BadRequest, UnsupportedMediaType
 
 # Import from the new package structure
 from ..core import DataImporter, ImportConfig
+# Import Spec 2: Graph Engine API
+from .graph_engine import graph_engine_api
 
 
 def convert_to_json_serializable(obj):
@@ -81,23 +83,23 @@ def create_app(config=None):
             file_path = data.get('filePath')
             mapping_config = data.get('mappingConfig', {})
             data_types = data.get('dataTypes', {})
-            file_encoding = data.get('fileEncoding', 'utf-8')
+            file_encoding = data.get('fileEncoding', 'utf - 8')
             delimiter = data.get('delimiter', ',')
             skip_rows = data.get('skipRows', 0)
             max_rows = data.get('maxRows')
 
             if not file_path or file_path.strip() == '':
                 return jsonify({'error': 'File path is required'}), 400
-                
+
             # Check for potentially dangerous path patterns
             # Allow absolute paths for testing but prevent directory traversal
             if '..' in file_path:
                 return jsonify({'error': 'Directory traversal not allowed'}), 400
-            
+
             # Check if file exists (basic validation)
             if not os.path.exists(file_path):
                 return jsonify({'error': 'Invalid file path'}), 400
-                
+
             if mapping_config is None:
                 return jsonify({'error': 'Mapping configuration is required'}), 400
 
@@ -130,6 +132,25 @@ def create_app(config=None):
                 'importLog': result.import_log}
 
             if result.success and result.graph_data:
+                # Spec 2 Integration: Add imported data to Graph Engine storage
+                graph_engine_graph = graph_engine_api.get_graph()
+                if graph_engine_graph:
+                    # Add all imported nodes to Graph Engine
+                    for node in result.graph_data.nodes:
+                        # Check if node already exists to avoid duplicates
+                        existing_node = graph_engine_graph.get_node_by_id(node.id)
+                        if not existing_node:
+                            graph_engine_graph.add_node(node)
+
+                    # Add all imported edges to Graph Engine
+                    for edge in result.graph_data.edges:
+                        # Check if edge already exists to avoid duplicates
+                        existing_edge = graph_engine_graph.get_edge_by_id(edge.id)
+                        if not existing_edge:
+                            graph_engine_graph.add_edge(edge)
+
+                    logger.info(f"Added {len(result.graph_data.nodes)} nodes and {len(result.graph_data.edges)} edges to Graph Engine")
+
                 # Add graph summary
                 response['graphSummary'] = {
                     'totalNodes': len(result.graph_data.nodes),
@@ -161,7 +182,7 @@ def create_app(config=None):
             return jsonify({'error': 'Invalid JSON format or request structure'}), 400
         except UnsupportedMediaType as e:
             logger.warning(f"Unsupported media type in import endpoint: {str(e)}")
-            return jsonify({'error': 'Content-Type must be application/json'}), 415
+            return jsonify({'error': 'Content - Type must be application / json'}), 415
         except Exception as e:
             logger.error(f"Error in import endpoint: {str(e)}")
             return jsonify({'error': str(e)}), 500
@@ -226,10 +247,10 @@ def create_app(config=None):
             return jsonify(ui_config)
 
         except BadRequest as e:
-            logger.warning(f"Bad request in mapping-config endpoint: {str(e)}")
+            logger.warning(f"Bad request in mapping - config endpoint: {str(e)}")
             return jsonify({'error': 'Invalid JSON format or request structure'}), 400
         except Exception as e:
-            logger.error(f"Error in mapping-config endpoint: {str(e)}")
+            logger.error(f"Error in mapping - config endpoint: {str(e)}")
             return jsonify({'error': str(e)}), 500
 
     @app.route('/upload', methods=['POST'])
@@ -322,6 +343,21 @@ def create_app(config=None):
         """Handle 500 errors."""
         logger.error(f"Internal server error: {str(error)}")
         return jsonify({'error': 'Internal server error'}), 500
+
+    # Register Spec 2: Graph Engine API blueprint
+    graph_blueprint = graph_engine_api.create_blueprint()
+    app.register_blueprint(graph_blueprint)
+    logger.info("Registered Graph Engine API endpoints")
+
+    # Register Spec 3: Visualization API blueprint (with circular import protection)
+    try:
+        from ..visualization.api.visualization import visualization_api
+        visualization_blueprint = visualization_api.create_blueprint()
+        app.register_blueprint(visualization_blueprint)
+        logger.info("Registered Visualization API endpoints")
+    except ImportError as e:
+        logger.warning(f"Could not import visualization API: {e}")
+        logger.info("Visualization API endpoints not registered")
 
     return app
 

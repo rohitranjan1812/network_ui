@@ -2,13 +2,12 @@
 Tests for the Flask API endpoints.
 """
 
+import pytest
 import json
 import os
 import tempfile
 from io import BytesIO
-from unittest.mock import patch
 
-import pytest
 from network_ui.api.app import create_app
 
 
@@ -60,7 +59,7 @@ class TestImportEndpoint:
     def test_import_csv_success(self, client, sample_csv_data):
         """Test successful CSV import."""
         with tempfile.NamedTemporaryFile(mode='w', suffix='.csv',
-                                        delete=False) as f:
+                                         delete=False) as f:
             f.write(sample_csv_data)
             temp_file_path = f.name
 
@@ -69,8 +68,8 @@ class TestImportEndpoint:
                 'node_id': 'id',
                 'node_name': 'name',
                 'node_attributes': ['category', 'department', 'region',
-                                   'performance_score', 'employee_count',
-                                   'revenue']
+                                    'performance_score', 'employee_count',
+                                    'revenue']
             }
 
             data = {
@@ -113,7 +112,7 @@ class TestImportEndpoint:
     def test_import_invalid_mapping(self, client, sample_csv_data):
         """Test import with invalid mapping configuration."""
         with tempfile.NamedTemporaryFile(mode='w', suffix='.csv',
-                                        delete=False) as f:
+                                         delete=False) as f:
             f.write(sample_csv_data)
             temp_file_path = f.name
 
@@ -149,7 +148,7 @@ class TestPreviewEndpoint:
     def test_preview_csv_success(self, client, sample_csv_data):
         """Test successful CSV preview."""
         with tempfile.NamedTemporaryFile(mode='w', suffix='.csv',
-                                        delete=False) as f:
+                                         delete=False) as f:
             f.write(sample_csv_data)
             temp_file_path = f.name
 
@@ -196,7 +195,7 @@ class TestMappingEndpoint:
     def test_mapping_success(self, client, sample_csv_data):
         """Test successful mapping configuration generation."""
         with tempfile.NamedTemporaryFile(mode='w', suffix='.csv',
-                                        delete=False) as f:
+                                         delete=False) as f:
             f.write(sample_csv_data)
             temp_file_path = f.name
 
@@ -212,8 +211,8 @@ class TestMappingEndpoint:
 
             result = json.loads(response.data)
             assert 'columns' in result
-            assert 'detected_types' in result
             assert 'suggestions' in result
+            assert 'detected_types' in result
 
         finally:
             os.unlink(temp_file_path)
@@ -244,7 +243,7 @@ class TestFileUploadEndpoint:
         }
 
         response = client.post('/upload', data=data,
-                              content_type='multipart/form-data')
+                               content_type='multipart/form-data')
         assert response.status_code == 200
 
         result = json.loads(response.data)
@@ -267,7 +266,7 @@ class TestFileUploadEndpoint:
         }
 
         response = client.post('/upload', data=data,
-                              content_type='multipart/form-data')
+                               content_type='multipart/form-data')
         assert response.status_code == 400
 
         result = json.loads(response.data)
@@ -287,12 +286,12 @@ class TestErrorHandling:
         """Test 500 error handling."""
         # Test that the error handler is properly configured
         app = create_app()
-        
+
         # Check that the error handlers are registered
         error_handlers = app.error_handler_spec.get(None, {})
         assert 404 in error_handlers
         assert 500 in error_handlers
-        
+
         # Test 404 error handler works
         response = client.get('/nonexistent-endpoint')
         assert response.status_code == 404
@@ -315,4 +314,4 @@ class TestAPIConfiguration:
     def test_app_configuration(self):
         """Test app configuration."""
         app = create_app()
-        assert app.config['TESTING'] is False 
+        assert app.config['TESTING'] is False

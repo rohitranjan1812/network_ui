@@ -2,9 +2,9 @@
 Pytest configuration and fixtures for Network UI tests.
 """
 
+import pytest
 from network_ui.core.models import GraphData, Node, Edge
 from network_ui.core import DataImporter, ImportConfig
-import pytest
 import os
 import sys
 import tempfile
@@ -92,7 +92,7 @@ def temp_json_file(sample_csv_data):
 def temp_xml_file(sample_csv_data):
     """Create a temporary XML file for testing."""
     with tempfile.NamedTemporaryFile(suffix='.xml', delete=False, mode='w') as f:
-        f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+        f.write('<?xml version="1.0" encoding="UTF - 8"?>\n')
         f.write('<data>\n')
 
         for _, row in sample_csv_data.iterrows():
@@ -245,7 +245,7 @@ def boolean_data_csv():
         'id': [1, 2, 3, 4, 5],
         'name': ['Team A', 'Team B', 'Team C', 'Team D', 'Team E'],
         'is_active': ['true', 'false', 'yes', 'no', '1'],
-        'has_permission': ['t', 'f', 'y', 'n', '0']
+        'has_permission': ['t', '', 'y', 'n', '0']
     }
     return pd.DataFrame(data)
 
@@ -267,15 +267,15 @@ def date_data_csv():
             'Team D',
             'Team E'],
         'created_date': [
-            '2024-01-01',
-            '2024-01-02',
-            '2024-01-03',
-            '2024-01-04',
-            '2024-01-05'],
+            '2024 - 01 - 01',
+            '2024 - 01 - 02',
+            '2024 - 01 - 03',
+            '2024 - 01 - 04',
+            '2024 - 01 - 05'],
         'updated_date': [
-            '2024-01-15 10:00:00',
-            '2024-01-16 11:30:00',
-            '2024-01-17 09:15:00',
-            '2024-01-18 14:45:00',
-            '2024-01-19 16:20:00']}
+            '2024 - 01 - 15 10:00:00',
+            '2024 - 01 - 16 11:30:00',
+            '2024 - 01 - 17 09:15:00',
+            '2024 - 01 - 18 14:45:00',
+            '2024 - 01 - 19 16:20:00']}
     return pd.DataFrame(data)

@@ -13,8 +13,8 @@ class DataValidator:
         'string': 'Text data',
         'integer': 'Whole numbers',
         'float': 'Decimal numbers',
-        'boolean': 'True/False values',
-        'date': 'Date values (YYYY-MM-DD)',
+        'boolean': 'True / False values',
+        'date': 'Date values (YYYY - MM - DD)',
         'datetime': 'Date and time values'
     }
 
@@ -42,10 +42,10 @@ class DataValidator:
         if self._is_boolean_column(clean_data):
             return 'boolean'
 
-        # Check for datetime/date types first (before numeric to avoid timestamp detection)
+        # Check for datetime / date types first (before numeric to avoid timestamp detection)
         if self._is_datetime_column(clean_data):
             return 'datetime'
-            
+
         if self._is_date_column(clean_data):
             return 'date'
 
@@ -61,7 +61,7 @@ class DataValidator:
 
     def _is_boolean_column(self, data: pd.Series) -> bool:
         """Check if column contains boolean values."""
-        bool_values = {'true', 'false', 'yes', 'no', '1', '0', 't', 'f', 'y', 'n'}
+        bool_values = {'true', 'false', 'yes', 'no', '1', '0', 't', '', 'y', 'n'}
         string_data = data.astype(str).str.lower()
         return all(val in bool_values for val in string_data.unique())
 
@@ -70,11 +70,11 @@ class DataValidator:
         # Check if already datetime type
         if pd.api.types.is_datetime64_any_dtype(data):
             return True
-        
+
         # Don't try to parse purely numeric data as datetime
         if pd.api.types.is_numeric_dtype(data):
             return False
-            
+
         try:
             # First try with default parsing
             pd.to_datetime(data, errors='raise')
@@ -104,9 +104,9 @@ class DataValidator:
             # Convert to string and check if they match date patterns
             date_strings = data.astype(str)
             date_patterns = [
-                r'^\d{4}-\d{2}-\d{2}$',  # YYYY-MM-DD
-                r'^\d{2}/\d{2}/\d{4}$',  # MM/DD/YYYY
-                r'^\d{4}/\d{2}/\d{2}$',  # YYYY/MM/DD
+                r'^\d{4}-\d{2}-\d{2}$',  # YYYY - MM - DD
+                r'^\d{2}/\d{2}/\d{4}$',  # MM / DD / YYYY
+                r'^\d{4}/\d{2}/\d{2}$',  # YYYY / MM / DD
             ]
 
             import re
@@ -135,9 +135,9 @@ class DataValidator:
             return False
 
     def validate_mapping_config(self,
-                               mapping_config: Dict[str, Any],
-                               available_columns: List[str]) -> Tuple[bool,
-                                                                      List[str]]:
+                                mapping_config: Dict[str, Any],
+                                available_columns: List[str]) -> Tuple[bool,
+                                                                       List[str]]:
         """
         Validate the mapping configuration against available columns.
 
@@ -152,7 +152,7 @@ class DataValidator:
 
         # Determine if this is edge data or node data
         is_edge_data = any(field.startswith('edge_')
-                          for field in mapping_config.keys())
+                           for field in mapping_config.keys())
 
         if is_edge_data:
             # For edge data, require edge_source and edge_target
@@ -186,16 +186,16 @@ class DataValidator:
                 column_mappings.append(column)
 
         duplicates = [col for col in set(column_mappings)
-                     if column_mappings.count(col) > 1]
+                      if column_mappings.count(col) > 1]
         if duplicates:
             errors.append(f"Duplicate column mappings: {duplicates}")
 
         return len(errors) == 0, errors
 
     def validate_data_types(self,
-                           data: pd.DataFrame,
-                           data_types: Dict[str, str]) -> Tuple[bool,
-                                                               List[str]]:
+                            data: pd.DataFrame,
+                            data_types: Dict[str, str]) -> Tuple[bool,
+                                                                 List[str]]:
         """
         Validate that data conforms to specified data types.
 
@@ -216,7 +216,7 @@ class DataValidator:
             # Validate that the expected_type is supported
             if expected_type not in self.SUPPORTED_TYPES:
                 errors.append(f"Unsupported data type '{expected_type}' for column '{column}'. "
-                            f"Supported types: {list(self.SUPPORTED_TYPES.keys())}")
+                              f"Supported types: {list(self.SUPPORTED_TYPES.keys())}")
                 continue
 
             try:
@@ -243,7 +243,7 @@ class DataValidator:
             'true': True, 'false': False,
             'yes': True, 'no': False,
             '1': True, '0': False,
-            't': True, 'f': False,
+            't': True, '': False,
             'y': True, 'n': False
         }
         return data.astype(str).str.lower().map(bool_map)
@@ -260,33 +260,33 @@ class DataValidator:
         """
         if file_path is None or file_path == '':
             return False, "File path is empty or None"
-        
+
         supported_extensions = ['.csv', '.json', '.xml']
         supported_formats = ['csv', 'json', 'xml']
-        
+
         # Check if the input itself is a supported format (without dot)
         if file_path.lower() in supported_formats:
             return True, ""
-        
+
         # Handle case where file_path doesn't have an extension
         if '.' not in file_path:
             return False, f"No file extension found. Supported formats: {supported_formats}"
-        
+
         # Extract the file extension
         file_extension = file_path.lower().split('.')[-1]
-        
+
         # Check if it's a supported extension
         if f'.{file_extension}' in supported_extensions or file_extension in supported_formats:
             return True, ""
         else:
             return False, (f"Unsupported file format: {file_extension}. "
-                          f"Supported formats: {supported_formats}")
+                           f"Supported formats: {supported_formats}")
 
         return True, ""
 
     def create_validation_report(self, data: pd.DataFrame,
-                                mapping_config: Dict[str, str],
-                                data_types: Dict[str, str]) -> Dict[str, Any]:
+                                 mapping_config: Dict[str, str],
+                                 data_types: Dict[str, str]) -> Dict[str, Any]:
         """
         Create a comprehensive validation report.
 

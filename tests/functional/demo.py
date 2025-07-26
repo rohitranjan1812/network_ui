@@ -39,9 +39,9 @@ def demo_node_import():
         print("\nSample Teams:")
         for i, node in enumerate(result.graph_data.nodes[:3]):
             print(f"   {i + 1}. {node.name}")
-            print(f"      Category: {node.attributes.get('category', 'N/A')}")
-            print(f"      Performance: {node.kpis.get('performance', 'N/A')}")
-            print(f"      Revenue: ${node.kpis.get('revenue', 'N/A'):,}")
+            print(f"      Category: {node.attributes.get('category', 'N / A')}")
+            print(f"      Performance: {node.kpis.get('performance', 'N / A')}")
+            print(f"      Revenue: ${node.kpis.get('revenue', 'N / A'):,}")
             print()
 
         return result.graph_data
@@ -78,7 +78,7 @@ def demo_edge_import():
 
     if result.success:
         print(f"Successfully imported {len(result.graph_data.edges)} "
-              f"relationships")
+              "relationships")
 
         # Show sample data
         print("\nSample Relationships:")
@@ -86,8 +86,8 @@ def demo_edge_import():
             print(f"   {i + 1}. Team {edge.source} -> Team {edge.target}")
             print(f"      Type: {edge.relationship_type}")
             print(f"      Weight: {edge.weight}")
-            print(f"      Collaboration: "
-                  f"{edge.kpi_components.get('collaboration', 'N/A')}")
+            print("      Collaboration: "
+                  f"{edge.kpi_components.get('collaboration', 'N / A')}")
             print()
 
         return result.graph_data
@@ -186,9 +186,9 @@ def demo_graph_summary(graph_data):
         print(f"   {edge_type}: {count} edges")
 
     print("\nAttributes:")
-    print(f"   Node Attributes: "
+    print("   Node Attributes: "
           f"{summary['attribute_summary']['node_attributes']}")
-    print(f"   Edge Attributes: "
+    print("   Edge Attributes: "
           f"{summary['attribute_summary']['edge_attributes']}")
 
 

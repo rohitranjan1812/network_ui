@@ -2,7 +2,6 @@
 Comprehensive tests for data validators.
 """
 
-import pytest
 import pandas as pd
 import numpy as np
 from network_ui.core.validators import DataValidator
@@ -40,7 +39,7 @@ class TestDataValidator:
             pd.Series(['true', 'false', 'true', 'false']),
             pd.Series(['yes', 'no', 'yes', 'no']),
             pd.Series(['1', '0', '1', '0']),
-            pd.Series(['t', 'f', 't', 'f']),
+            pd.Series(['t', '', 't', '']),
             pd.Series(['y', 'n', 'y', 'n'])
         ]
 
@@ -50,16 +49,16 @@ class TestDataValidator:
 
     def test_detect_data_type_datetime(self):
         """Test datetime data type detection."""
-        data = pd.Series(['2024-01-01 10:00:00', '2024-01-02 11:30:00'])
+        data = pd.Series(['2024 - 01 - 01 10:00:00', '2024 - 01 - 02 11:30:00'])
         detected_type = self.validator.detect_data_type(data)
         assert detected_type == 'datetime'
 
     def test_detect_data_type_date(self):
         """Test date data type detection."""
         date_formats = [
-            pd.Series(['2024-01-01', '2024-01-02']),
-            pd.Series(['01/01/2024', '02/01/2024']),
-            pd.Series(['2024/01/01', '2024/01/02'])
+            pd.Series(['2024 - 01 - 01', '2024 - 01 - 02']),
+            pd.Series(['01 / 01 / 2024', '02 / 01 / 2024']),
+            pd.Series(['2024 / 01 / 01', '2024 / 01 / 02'])
         ]
 
         for data in date_formats:
@@ -110,7 +109,7 @@ class TestDataValidator:
         # assert any('node_name' in error for error in errors)
 
     def test_validate_mapping_config_missing_column(self):
-        """Test mapping configuration with non-existent column."""
+        """Test mapping configuration with non - existent column."""
         mapping_config = {
             'node_id': 'id',
             'node_name': 'name',
@@ -205,7 +204,7 @@ class TestDataValidator:
 
     def test_validate_file_format_invalid(self):
         """Test invalid file format validation."""
-        invalid_files = ['test.txt', 'data.xlsx', 'graph.pdf']
+        invalid_files = ['test.txt', 'data.xlsx', 'graph.pd']
 
         for file_path in invalid_files:
             is_valid, error_msg = self.validator.validate_file_format(
@@ -287,7 +286,7 @@ class TestDataValidator:
     def test_convert_to_boolean(self):
         """Test boolean conversion."""
         data = pd.Series(['true', 'false', 'yes', 'no',
-                         '1', '0', 't', 'f', 'y', 'n'])
+                         '1', '0', 't', '', 'y', 'n'])
         converted = self.validator._convert_to_boolean(data)
 
         expected = [

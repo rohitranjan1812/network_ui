@@ -2,8 +2,8 @@
 Data transformation module for converting imported data to graph format.
 """
 
-import pandas as pd
 import uuid
+import pandas as pd
 from typing import Dict, List, Tuple, Any, Set
 from network_ui.core.models import Node, Edge, GraphData
 
@@ -41,10 +41,10 @@ class GraphTransformer:
     def _is_edge_data(self, mapping_config: Dict[str, str]) -> bool:
         """Check if mapping config is for edge data."""
         return any(field.startswith('edge_')
-                  for field in mapping_config.keys())
+                   for field in mapping_config.keys())
 
     def _transform_data_types(self, data: pd.DataFrame,
-                             data_types: Dict[str, str]) -> pd.DataFrame:
+                              data_types: Dict[str, str]) -> pd.DataFrame:
         """
         Transform data types according to the specified data types.
 
@@ -89,7 +89,7 @@ class GraphTransformer:
             'true': True, 'false': False,
             'yes': True, 'no': False,
             '1': True, '0': False,
-            't': True, 'f': False,
+            't': True, '': False,
             'y': True, 'n': False
         }
         # Convert to boolean but keep as object dtype to match test expectations
@@ -241,17 +241,17 @@ class GraphTransformer:
         # Check if nodes already have explicit levels set (not all level 1)
         existing_levels = set(node.level for node in graph_data.nodes)
         has_explicit_levels = len(existing_levels) > 1 or (len(existing_levels) == 1 and 1 not in existing_levels)
-        
+
         # If nodes already have explicit levels, don't override them
         if has_explicit_levels:
             return graph_data
-        
-        # Create multi-level hierarchy based on different attributes
-        
+
+        # Create multi - level hierarchy based on different attributes
+
         # Level 1: Start with some nodes at level 1 (base level)
         for node in graph_data.nodes:
             node.level = 1
-        
+
         # Level 2: Promote nodes in larger departments
         department_groups: Dict[str, List[Node]] = {}
         for node in graph_data.nodes:
@@ -259,41 +259,41 @@ class GraphTransformer:
             if dept not in department_groups:
                 department_groups[dept] = []
             department_groups[dept].append(node)
-        
+
         # Promote nodes in departments with more than average size to level 2
         avg_dept_size = len(graph_data.nodes) / len(department_groups) if department_groups else 1
         for dept, nodes in department_groups.items():
             if len(nodes) >= avg_dept_size:
                 for node in nodes:
                     node.level = 2
-        
-        # Level 3: Promote nodes in department-location combinations with multiple priorities
+
+        # Level 3: Promote nodes in department - location combinations with multiple priorities
         for dept_name, dept_nodes in department_groups.items():
             location_groups_in_dept: Dict[str, List[Node]] = {}
-            
+
             for node in dept_nodes:
                 location = node.attributes.get('location', 'Unknown')
                 if location not in location_groups_in_dept:
                     location_groups_in_dept[location] = []
                 location_groups_in_dept[location].append(node)
-            
+
             # Promote some location groups to level 3 (those with high priority or large size)
             for location, location_nodes in location_groups_in_dept.items():
-                high_priority_count = sum(1 for node in location_nodes 
-                                        if node.attributes.get('priority') == 'High')
-                
+                high_priority_count = sum(1 for node in location_nodes
+                                          if node.attributes.get('priority') == 'High')
+
                 # Promote if majority are high priority or if it's a large group
-                if (high_priority_count > len(location_nodes) / 2 or 
-                    len(location_nodes) > avg_dept_size / 2):
+                if (high_priority_count > len(location_nodes) / 2 or
+                        len(location_nodes) > avg_dept_size / 2):
                     for node in location_nodes:
                         if node.level >= 2:  # Only promote if already at level 2+
                             node.level = 3
-        
+
         # Level 4: Promote only the highest priority nodes in level 3
         level_3_nodes = [node for node in graph_data.nodes if node.level == 3]
-        high_priority_level_3 = [node for node in level_3_nodes 
-                                if node.attributes.get('priority') == 'High']
-        
+        high_priority_level_3 = [node for node in level_3_nodes
+                                 if node.attributes.get('priority') == 'High']
+
         # Promote only some high priority nodes to level 4 (top performers)
         for i, node in enumerate(high_priority_level_3):
             if i < len(high_priority_level_3) // 3:  # Top third
@@ -342,22 +342,22 @@ class GraphTransformer:
         if duplicate_ids:
             errors.append(f"Duplicate node IDs: {duplicate_ids}")
 
-        # Check for edges with non-existent nodes
+        # Check for edges with non - existent nodes
         existing_node_ids = set(node_ids)
         for edge in graph_data.edges:
             if edge.source not in existing_node_ids:
                 errors.append(
-                    f"Edge {edge.id} references non-existent source node: "
+                    f"Edge {edge.id} references non - existent source node: "
                     f"{edge.source}")
             if edge.target not in existing_node_ids:
                 errors.append(
-                    f"Edge {edge.id} references non-existent target node: "
+                    f"Edge {edge.id} references non - existent target node: "
                     f"{edge.target}")
 
-        # Check for self-loops (if not allowed)
+        # Check for self - loops (if not allowed)
         for edge in graph_data.edges:
             if edge.source == edge.target:
-                errors.append(f"Self-loop detected in edge {edge.id}")
+                errors.append(f"Self - loop detected in edge {edge.id}")
 
         # Check for duplicate edges
         edge_keys = [(edge.source, edge.target, edge.relationship_type)
@@ -403,8 +403,8 @@ class GraphTransformer:
             summary['edge_types'][edge_type] += 1
 
         # Analyze attributes and create value distributions
-        node_attr_summary = {}
-        edge_attr_summary = {}
+        node_attr_summary: Dict[str, Any] = {}
+        edge_attr_summary: Dict[str, Dict[Any, int]] = {}
 
         # Collect all unique attribute names first
         all_node_attrs: Set[str] = set()
@@ -418,7 +418,7 @@ class GraphTransformer:
             all_edge_attrs.update(edge.attributes.keys())
             all_edge_attrs.update(edge.kpi_components.keys())  # Include KPI components
 
-        # Create value distributions/statistics for each attribute
+        # Create value distributions / statistics for each attribute
         for attr_name in all_node_attrs:
             attr_values = []
             for node in graph_data.nodes:
@@ -426,7 +426,7 @@ class GraphTransformer:
                     attr_values.append(node.attributes[attr_name])
                 elif attr_name in node.kpis:  # Check KPIs as well
                     attr_values.append(node.kpis[attr_name])
-            
+
             if attr_values:
                 # Check if attribute is numeric
                 try:
@@ -440,7 +440,7 @@ class GraphTransformer:
                             'count': len(numeric_values)
                         }
                     else:
-                        # Provide value distribution for non-numeric attributes
+                        # Provide value distribution for non - numeric attributes
                         value_counts = {}
                         for value in attr_values:
                             if value not in value_counts:
@@ -448,7 +448,7 @@ class GraphTransformer:
                             value_counts[value] += 1
                         node_attr_summary[attr_name] = value_counts
                 except (ValueError, TypeError):
-                    # Provide value distribution for non-numeric attributes
+                    # Provide value distribution for non - numeric attributes
                     value_counts = {}
                     for value in attr_values:
                         if value not in value_counts:
@@ -457,19 +457,19 @@ class GraphTransformer:
                     node_attr_summary[attr_name] = value_counts
 
         for attr_name in all_edge_attrs:
-            attr_values = {}
+            value_counts: Dict[Any, int] = {}
             for edge in graph_data.edges:
                 if attr_name in edge.attributes:
                     value = edge.attributes[attr_name]
-                    if value not in attr_values:
-                        attr_values[value] = 0
-                    attr_values[value] += 1
+                    if value not in value_counts:
+                        value_counts[value] = 0
+                    value_counts[value] += 1
                 elif attr_name in edge.kpi_components:  # Check KPI components as well
                     value = edge.kpi_components[attr_name]
-                    if value not in attr_values:
-                        attr_values[value] = 0
-                    attr_values[value] += 1
-            edge_attr_summary[attr_name] = attr_values
+                    if value not in value_counts:
+                        value_counts[value] = 0
+                    value_counts[value] += 1
+            edge_attr_summary[attr_name] = value_counts
 
         # Combine node and edge attributes in the main attribute_summary
         summary['attribute_summary'] = node_attr_summary

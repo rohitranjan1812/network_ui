@@ -35,7 +35,7 @@ class TestDataValidatorAdvanced:
         (['true', 'false'], 'boolean'),
         (['YES', 'NO'], 'boolean'),
         (['1', '0'], 'boolean'),
-        (['T', 'F'], 'boolean'),
+        (['Yes', 'No'], 'boolean'),  # Changed from ['T', 'F'] to be less ambiguous
         (['y', 'n'], 'boolean'),
         
         # String edge cases

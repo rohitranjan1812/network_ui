@@ -174,7 +174,7 @@ class DataMapper:
             'true': True, 'false': False,
             'yes': True, 'no': False,
             '1': True, '0': False,
-            't': True, 'f': False,
+            't': True, '': False,
             'y': True, 'n': False
         }
         converted = data.astype(str).str.lower().map(bool_map)

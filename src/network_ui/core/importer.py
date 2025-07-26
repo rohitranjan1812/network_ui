@@ -169,7 +169,7 @@ class DataImporter:
                     skiprows = list(range(1, config.skip_rows + 1))
                 else:
                     skiprows = None
-                
+
                 return pd.read_csv(
                     file_path,
                     encoding=config.file_encoding,
@@ -335,7 +335,7 @@ class DataImporter:
         return "\n".join(log_lines)
 
     def get_data_preview(self, file_path: str,
-                         encoding: str = "utf-8",
+                         encoding: str = "utf - 8",
                          max_rows: int = 10) -> Optional[Dict[str, Any]]:
         """
         Get a preview of the data without full import.
@@ -378,7 +378,7 @@ class DataImporter:
             return None
 
     def create_mapping_ui_config(
-            self, file_path: str, encoding: str = "utf-8") -> Optional[Dict[str, Any]]:
+            self, file_path: str, encoding: str = "utf - 8") -> Optional[Dict[str, Any]]:
         """
         Create configuration for the mapping UI.
 

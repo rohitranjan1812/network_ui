@@ -3,14 +3,14 @@ Advanced Test Cases for Data Importer
 Tests edge cases, stress scenarios, and robustness of the import functionality.
 """
 
+import pytest
 import os
 import tempfile
-import pytest
 import pandas as pd
 import numpy as np
-from unittest.mock import patch, mock_open
 from network_ui.core import DataImporter, ImportConfig
 from network_ui.core.models import GraphData, Node, Edge
+from unittest.mock import patch
 
 
 @pytest.mark.unit
@@ -32,7 +32,7 @@ class TestDataImporterAdvanced:
         (100, 100),
         (1000, 1000),
         (5000, 5000),
-    ])
+            ])
     def test_large_dataset_import(self, file_size, expected_rows):
         """Test importing large datasets of varying sizes."""
         # Create large test dataset
@@ -44,7 +44,7 @@ class TestDataImporterAdvanced:
             'active': np.random.choice([True, False], file_size)
         }
         df = pd.DataFrame(data)
-        
+
         file_path = os.path.join(self.temp_dir, f'large_dataset_{file_size}.csv')
         df.to_csv(file_path, index=False)
 
@@ -60,7 +60,7 @@ class TestDataImporterAdvanced:
         )
 
         result = self.importer.import_data(config)
-        
+
         assert result.success is True
         assert result.processed_rows == expected_rows
         assert len(result.graph_data.nodes) == expected_rows
@@ -86,9 +86,9 @@ class TestDataImporterAdvanced:
                 'name': ['Nöde Ñame 1', 'Nøde Nàme 2', 'Nôde Namê 3'],
                 'description': ['Spéciał chärs', 'Ünïcode tëst', 'Accénted vowëls']
             }
-        
+
         df = pd.DataFrame(data)
-        
+
         file_path = os.path.join(self.temp_dir, f'encoding_test_{encoding.replace("-", "_")}.csv')
         df.to_csv(file_path, index=False, encoding=encoding)
 
@@ -103,7 +103,7 @@ class TestDataImporterAdvanced:
         )
 
         result = self.importer.import_data(config)
-        
+
         assert result.success is True
         assert len(result.graph_data.nodes) == 3
         assert 'ö' in result.graph_data.nodes[0].name or 'N' in result.graph_data.nodes[0].name
@@ -115,7 +115,7 @@ class TestDataImporterAdvanced:
                 '1{0}Node1{0}TypeA'.format(delimiter),
                 '2{0}Node2{0}TypeB'.format(delimiter),
                 '3{0}Node3{0}TypeC'.format(delimiter)]
-        
+
         # Use safe filename for Windows
         delimiter_name = "tab" if delimiter == "\t" else "pipe" if delimiter == "|" else delimiter
         file_path = os.path.join(self.temp_dir, f'delimiter_test_{delimiter_name}.csv')
@@ -133,7 +133,7 @@ class TestDataImporterAdvanced:
         )
 
         result = self.importer.import_data(config)
-        
+
         assert result.success is True
         assert len(result.graph_data.nodes) == 3
         assert result.graph_data.nodes[0].name == 'Node1'
@@ -147,7 +147,7 @@ class TestDataImporterAdvanced:
 3,Node3,TypeC,300,extra_column
 4,Node4 with "quotes",TypeD,400
 5,Node5,TypeE,'''
-        
+
         file_path = os.path.join(self.temp_dir, 'malformed.csv')
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(malformed_data)
@@ -162,7 +162,7 @@ class TestDataImporterAdvanced:
         )
 
         result = self.importer.import_data(config)
-        
+
         # Should handle malformed data gracefully - may not succeed but should not crash
         # The importer should either succeed with warnings or fail gracefully
         if result.success:
@@ -171,12 +171,12 @@ class TestDataImporterAdvanced:
         else:
             # If it fails, should have meaningful error messages
             assert len(result.errors) > 0
-            assert any('failed' in error.lower() or 'read' in error.lower() 
+            assert any('failed' in error.lower() or 'read' in error.lower()
                       or 'tokenizing' in error.lower() or 'fields' in error.lower()
                       or 'error' in error.lower() for error in result.errors)
 
     def test_memory_efficient_large_file(self):
-        """Test memory-efficient processing of large files."""
+        """Test memory - efficient processing of large files."""
         # Create a large dataset
         large_data = {
             'id': range(1, 10001),  # 10k rows
@@ -184,7 +184,7 @@ class TestDataImporterAdvanced:
             'data': ['x' * 100 for _ in range(10000)]  # Large text fields
         }
         df = pd.DataFrame(large_data)
-        
+
         file_path = os.path.join(self.temp_dir, 'large_memory_test.csv')
         df.to_csv(file_path, index=False)
 
@@ -199,7 +199,7 @@ class TestDataImporterAdvanced:
         )
 
         result = self.importer.import_data(config)
-        
+
         assert result.success is True
         assert result.processed_rows == 1000  # Should respect max_rows
         assert len(result.graph_data.nodes) == 1000
@@ -209,18 +209,18 @@ class TestDataImporterAdvanced:
         """Test handling datasets with high percentages of null values."""
         size = 1000
         null_count = int(size * null_percentage)
-        
+
         # Create dataset with specified null percentage
         ids = list(range(1, size + 1))
         names = [f'Node_{i}' if i > null_count else None for i in range(1, size + 1)]
         values = [np.random.uniform(0, 100) if i > null_count else None for i in range(1, size + 1)]
-        
+
         data = pd.DataFrame({
             'id': ids,
             'name': names,
             'value': values
         })
-        
+
         file_path = os.path.join(self.temp_dir, f'null_test_{null_percentage}.csv')
         data.to_csv(file_path, index=False)
 
@@ -234,7 +234,7 @@ class TestDataImporterAdvanced:
         )
 
         result = self.importer.import_data(config)
-        
+
         # Should handle nulls gracefully
         assert result.success is True
         assert len(result.graph_data.nodes) <= size
@@ -245,14 +245,14 @@ class TestDataImporterAdvanced:
         """Test thread safety of concurrent imports."""
         import threading
         import time
-        
+
         # Create test data
         data = pd.DataFrame({
             'id': range(1, 101),
             'name': [f'Node_{i}' for i in range(1, 101)],
             'value': range(1, 101)
         })
-        
+
         file_path = os.path.join(self.temp_dir, 'concurrent_test.csv')
         data.to_csv(file_path, index=False)
 
@@ -267,7 +267,7 @@ class TestDataImporterAdvanced:
 
         results = []
         errors = []
-        
+
         def import_worker(worker_id):
             try:
                 importer = DataImporter()  # Each thread gets its own instance
@@ -277,18 +277,18 @@ class TestDataImporterAdvanced:
                     time.sleep(0.01)  # Small delay to encourage race conditions
             except Exception as e:
                 errors.append((worker_id, str(e)))
-        
+
         # Start multiple threads
         threads = []
         for i in range(3):  # 3 threads to avoid overwhelming the system
             thread = threading.Thread(target=import_worker, args=(i,))
             threads.append(thread)
             thread.start()
-        
+
         # Wait for all threads to complete
         for thread in threads:
             thread.join()
-        
+
         # Check results
         assert len(errors) == 0, f"Errors in concurrent import: {errors}"
         assert len(results) == 15  # 3 threads * 5 iterations each
@@ -305,7 +305,7 @@ class TestDataImporterAdvanced:
             ],
             "invalid_section": "not expected"
         }'''
-        
+
         file_path = os.path.join(self.temp_dir, 'invalid.json')
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(invalid_json)
@@ -319,7 +319,7 @@ class TestDataImporterAdvanced:
         )
 
         result = self.importer.import_data(config)
-        
+
         # Should handle invalid JSON gracefully
         if result.success:
             assert len(result.graph_data.nodes) >= 1  # Should process valid nodes
@@ -337,7 +337,7 @@ class TestDataImporterAdvanced:
             'name': [f'Node_{i}' for i in range(1, 11)],
             'long_description': [long_string] * 10
         })
-        
+
         file_path = os.path.join(self.temp_dir, 'long_fields.csv')
         data.to_csv(file_path, index=False)
 
@@ -351,7 +351,7 @@ class TestDataImporterAdvanced:
         )
 
         result = self.importer.import_data(config)
-        
+
         assert result.success is True
         assert len(result.graph_data.nodes) == 10
         # Should handle long strings without memory issues
@@ -365,7 +365,7 @@ class TestDataImporterAdvanced:
             'target': [2, 3, 4, 5, 1, 3, 4, 5],
             'weight': [1.0, 1.0, 1.0, 1.0, 1.0, 0.5, 0.5, 0.5]
         })
-        
+
         file_path = os.path.join(self.temp_dir, 'circular_edges.csv')
         edge_data.to_csv(file_path, index=False)
 
@@ -379,10 +379,10 @@ class TestDataImporterAdvanced:
         )
 
         result = self.importer.import_data(config)
-        
+
         assert result.success is True
         assert len(result.graph_data.edges) == 8
-        
+
         # Check for circular references
         source_target_pairs = [(edge.source, edge.target) for edge in result.graph_data.edges]
         assert ('1', '2') in source_target_pairs
@@ -405,7 +405,7 @@ class TestDataImporterAdvanced:
             'name': [f'Node_{i}' for i in range(1, 101)],
             'value': range(1, 101)
         })
-        
+
         file_path = os.path.join(self.temp_dir, 'skip_max_test.csv')
         data.to_csv(file_path, index=False)
 
@@ -421,7 +421,7 @@ class TestDataImporterAdvanced:
         )
 
         result = self.importer.import_data(config)
-        
+
         # The importer should handle skip_rows and max_rows correctly
         if result.success:
             actual_rows = min(expected_count, max(0, 100 - skip_rows))
@@ -436,12 +436,12 @@ class TestDataImporterAdvanced:
         edge_case_data = pd.DataFrame({
             'id': [1, 2, 3, 4, 5],
             'name': ['Node1', 'Node2', 'Node3', 'Node4', 'Node5'],
-            'mixed_numbers': ['123', '123.45', '1e10', '0.000001', 'inf'],
+            'mixed_numbers': ['123', '123.45', '1e10', '0.000001', 'in'],
             'mixed_bools': ['true', '1', 'yes', 'false', 'maybe'],
-            'mixed_dates': ['2024-01-01', '01/01/2024', '2024-13-01', 'not-a-date', ''],
+            'mixed_dates': ['2024 - 01 - 01', '01 / 01 / 2024', '2024 - 13 - 01', 'not - a-date', ''],
             'special_chars': ['!@#$%', 'çñüé', '中文', '🚀🎉', '\n\t\r']
         })
-        
+
         file_path = os.path.join(self.temp_dir, 'edge_cases.csv')
         edge_case_data.to_csv(file_path, index=False)
 
@@ -458,7 +458,7 @@ class TestDataImporterAdvanced:
         )
 
         result = self.importer.import_data(config)
-        
+
         assert result.success is True
         assert len(result.graph_data.nodes) == 5
         # Should handle edge cases gracefully without crashing
@@ -469,16 +469,16 @@ class TestDataImporterAdvanced:
         # Test with very long file path
         long_filename = 'a' * 200 + '.csv'
         long_file_path = os.path.join(self.temp_dir, long_filename)
-        
+
         # Create simple test data
         data = pd.DataFrame({'id': [1, 2], 'name': ['A', 'B']})
-        
+
         try:
             data.to_csv(long_file_path, index=False)
             file_created = True
         except OSError:
             file_created = False
-        
+
         if file_created:
             config = ImportConfig(
                 file_path=long_file_path,
@@ -495,13 +495,13 @@ class TestDataImporterAdvanced:
             )
             result = self.importer.import_data(config)
             assert result.success is False
-            # Check that the error message contains permission-related text
-            assert any('permission' in error.lower() or 'access' in error.lower() or 'denied' in error.lower() 
+            # Check that the error message contains permission - related text
+            assert any('permission' in error.lower() or 'access' in error.lower() or 'denied' in error.lower()
                       or 'failed' in error.lower() for error in result.errors)
 
     def test_xml_complex_structures(self):
         """Test importing complex XML structures."""
-        complex_xml = '''<?xml version="1.0" encoding="UTF-8"?>
+        complex_xml = '''<?xml version="1.0" encoding="UTF - 8"?>
 <root>
     <nodes>
         <node id="1" name="Node1">
@@ -511,7 +511,7 @@ class TestDataImporterAdvanced:
                 <attribute name="active" value="true"/>
             </attributes>
             <metadata>
-                <created>2024-01-01</created>
+                <created>2024 - 01 - 01</created>
                 <tags>
                     <tag>important</tag>
                     <tag>primary</tag>
@@ -527,7 +527,7 @@ class TestDataImporterAdvanced:
         </node>
     </nodes>
 </root>'''
-        
+
         file_path = os.path.join(self.temp_dir, 'complex.xml')
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(complex_xml)
@@ -541,6 +541,6 @@ class TestDataImporterAdvanced:
         )
 
         result = self.importer.import_data(config)
-        
+
         # Should handle complex XML structure
-        assert result.success is True or len(result.errors) > 0  # Either works or fails gracefully 
+        assert result.success is True or len(result.errors) > 0  # Either works or fails gracefully

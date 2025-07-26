@@ -14,9 +14,9 @@ from .core.models import Node, Edge, GraphData, ImportResult
 
 __all__ = [
     'DataImporter',
-    'ImportConfig',
-    'Node',
-    'Edge',
-    'GraphData',
-    'ImportResult'
+        'ImportConfig',
+        'Node',
+        'Edge',
+        'GraphData',
+        'ImportResult'
 ]

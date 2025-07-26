@@ -2,8 +2,8 @@
 Comprehensive tests for graph transformers.
 """
 
-import pandas as pd
 import pytest
+import pandas as pd
 from network_ui.core.transformers import GraphTransformer
 from network_ui.core.models import GraphData, Node, Edge
 
@@ -128,7 +128,7 @@ class TestGraphTransformer:
             data, mapping_config, data_types)
 
         assert isinstance(graph_data, GraphData)
-        assert len(graph_data.nodes) == 3  # Auto-created nodes
+        assert len(graph_data.nodes) == 3  # Auto - created nodes
         assert len(graph_data.edges) == 3
 
         # Check first edge
@@ -186,14 +186,14 @@ class TestGraphTransformer:
 
         with pytest.raises(ValueError, match="requires 'node_id'"):
             self.transformer._transform_node_data(data, mapping_config)
-            
+
         # Test node_name optional (should work fine)
         valid_mapping_config = {
             'node_id': 'id',
             # node_name is optional, will be generated
             'attribute_category': 'category'
         }
-        
+
         result = self.transformer.transform_to_graph(data, valid_mapping_config, {
             'id': 'integer',
             'category': 'string'
@@ -226,7 +226,7 @@ class TestGraphTransformer:
         graph_data = self.transformer._transform_edge_data(
             data, mapping_config)
 
-        assert len(graph_data.nodes) == 3  # Auto-created nodes
+        assert len(graph_data.nodes) == 3  # Auto - created nodes
         assert len(graph_data.edges) == 3
 
         # Check edge with all fields
@@ -345,7 +345,7 @@ class TestGraphTransformer:
         node1 = Node(id="1", name="Node 1")
         graph_data.add_node(node1)
 
-        # Add edge with non-existent source
+        # Add edge with non - existent source
         edge1 = Edge(source="999", target="1")
         graph_data.add_edge(edge1)
 
@@ -354,17 +354,17 @@ class TestGraphTransformer:
 
         assert is_valid is False
         assert len(errors) > 0
-        assert any('non-existent source node' in error for error in errors)
+        assert any('non - existent source node' in error for error in errors)
 
     def test_validate_graph_structure_self_loops(self):
-        """Test graph structure validation with self-loops."""
+        """Test graph structure validation with self - loops."""
         graph_data = GraphData()
 
         # Add node
         node1 = Node(id="1", name="Node 1")
         graph_data.add_node(node1)
 
-        # Add self-loop
+        # Add self - loop
         edge1 = Edge(source="1", target="1")
         graph_data.add_edge(edge1)
 
@@ -373,7 +373,7 @@ class TestGraphTransformer:
 
         assert is_valid is False
         assert len(errors) > 0
-        assert any('Self-loop' in error for error in errors)
+        assert any('Self - loop' in error for error in errors)
 
     def test_validate_graph_structure_duplicate_edges(self):
         """Test graph structure validation with duplicate edges."""
@@ -467,7 +467,7 @@ class TestGraphTransformer:
     def test_convert_to_boolean(self):
         """Test boolean conversion."""
         data = pd.Series(['true', 'false', 'yes', 'no',
-                         '1', '0', 't', 'f', 'y', 'n'])
+                         '1', '0', 't', '', 'y', 'n'])
         converted = self.transformer._convert_to_boolean(data)
 
         expected = [

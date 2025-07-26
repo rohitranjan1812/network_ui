@@ -4,8 +4,6 @@ Comprehensive tests for the main data importer.
 
 import os
 import tempfile
-import pytest
-from unittest.mock import patch, MagicMock
 from network_ui.core import DataImporter, ImportConfig
 from network_ui.core.models import GraphData, Node, Edge
 
@@ -119,7 +117,7 @@ class TestDataImporter:
 
         assert result.success is True
         assert result.processed_rows == 8
-        assert len(result.graph_data.nodes) == 8  # Auto-created nodes
+        assert len(result.graph_data.nodes) == 8  # Auto - created nodes
         assert len(result.graph_data.edges) == 8
         assert len(result.errors) == 0
 
@@ -146,7 +144,7 @@ class TestDataImporter:
                 "node_name": "name",
                 "attribute_category": "category"
             }
-            # No data_types provided, should auto-detect
+            # No data_types provided, should auto - detect
         )
 
         result = self.importer.import_data(config)
@@ -175,7 +173,7 @@ class TestDataImporter:
             os.unlink(temp_file)
 
     def test_import_nonexistent_file(self):
-        """Test import with non-existent file."""
+        """Test import with non - existent file."""
         config = ImportConfig(file_path="nonexistent_file.csv")
         result = self.importer.import_data(config)
 
@@ -333,7 +331,7 @@ class TestDataImporter:
         assert 'detected_types' in preview
 
     def test_get_data_preview_nonexistent_file(self):
-        """Test data preview with non-existent file."""
+        """Test data preview with non - existent file."""
         preview = self.importer.get_data_preview("nonexistent_file.csv")
 
         assert preview is None
@@ -352,7 +350,7 @@ class TestDataImporter:
         assert 'data_preview' in ui_config
 
     def test_create_mapping_ui_config_nonexistent_file(self):
-        """Test mapping UI configuration with non-existent file."""
+        """Test mapping UI configuration with non - existent file."""
         ui_config = self.importer.create_mapping_ui_config(
             "nonexistent_file.csv")
 
@@ -381,7 +379,7 @@ class TestDataImporter:
         """Test import with different encoding."""
         config = ImportConfig(
             file_path="data/test_data/test_data.csv",
-            file_encoding="utf-8",
+            file_encoding="utf - 8",
             mapping_config={
                 "node_id": "id",
                 "node_name": "name"
