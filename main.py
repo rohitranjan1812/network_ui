@@ -41,7 +41,7 @@ def create_sample_data() -> GraphData:
     nodes = [
         Node(
             id="1",
-            label="Alice",
+            name="Alice",
             attributes={
                 "age": 25,
                 "department": "Engineering",
@@ -51,7 +51,7 @@ def create_sample_data() -> GraphData:
         ),
         Node(
             id="2", 
-            label="Bob",
+            name="Bob",
             attributes={
                 "age": 30,
                 "department": "Marketing",
@@ -61,7 +61,7 @@ def create_sample_data() -> GraphData:
         ),
         Node(
             id="3",
-            label="Charlie", 
+            name="Charlie", 
             attributes={
                 "age": 28,
                 "department": "Engineering",
@@ -71,7 +71,7 @@ def create_sample_data() -> GraphData:
         ),
         Node(
             id="4",
-            label="Diana",
+            name="Diana",
             attributes={
                 "age": 35,
                 "department": "Sales",
@@ -81,7 +81,7 @@ def create_sample_data() -> GraphData:
         ),
         Node(
             id="5",
-            label="Eve",
+            name="Eve",
             attributes={
                 "age": 27,
                 "department": "Engineering",
@@ -97,7 +97,7 @@ def create_sample_data() -> GraphData:
             id="1-2",
             source="1",
             target="2",
-            label="Collaborates",
+            relationship_type="Collaborates",
             attributes={
                 "strength": 0.8,
                 "type": "work",
@@ -108,7 +108,7 @@ def create_sample_data() -> GraphData:
             id="1-3",
             source="1", 
             target="3",
-            label="Mentors",
+            relationship_type="Mentors",
             attributes={
                 "strength": 0.9,
                 "type": "mentorship",
@@ -119,7 +119,7 @@ def create_sample_data() -> GraphData:
             id="2-4",
             source="2",
             target="4",
-            label="Reports to",
+            relationship_type="Reports to",
             attributes={
                 "strength": 1.0,
                 "type": "hierarchy",
@@ -130,7 +130,7 @@ def create_sample_data() -> GraphData:
             id="3-5",
             source="3",
             target="5",
-            label="Collaborates",
+            relationship_type="Collaborates",
             attributes={
                 "strength": 0.7,
                 "type": "work",
@@ -141,7 +141,7 @@ def create_sample_data() -> GraphData:
             id="4-5",
             source="4",
             target="5",
-            label="Manages",
+            relationship_type="Manages",
             attributes={
                 "strength": 0.6,
                 "type": "hierarchy",

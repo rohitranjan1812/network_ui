@@ -15,209 +15,208 @@ from ..core.models import GraphData, Node, Edge
 
 logger = logging.getLogger(__name__)
 
-
-class LayoutAlgorithm(Enum):
+class LayoutAlgorithm(Enum): 
     """Available layout algorithms."""
     FORCE_DIRECTED = "force_directed"
     HIERARCHICAL = "hierarchical"
     CIRCULAR = "circular"
     RANDOM = "random"
 
-
-class VisualStyle(Enum):
+class VisualStyle(Enum): 
     """Visual style options."""
     SOLID = "solid"
     DASHED = "dashed"
     DOTTED = "dotted"
 
-
 @dataclass
-class VisualConfig:
+class VisualConfig: 
     """Configuration for visual properties."""
-    # Node properties
-    node_size: int = 20
-    node_color: str = "#4A90E2"
-    node_shape: str = "circle"
-    show_node_labels: bool = True
-    node_label_size: int = 12
+  # Node properties
+    node_size:   int = 20
+    node_color:   str = "#4A90E2"
+    node_shape:   str = "circle"
+    show_node_labels:   bool = True
+    node_label_size:   int = 12
 
-    # Edge properties
-    edge_width: int = 2
-    edge_color: str = "#666666"
-    edge_style: VisualStyle = VisualStyle.SOLID
-    show_edge_labels: bool = False
-    show_arrows: bool = True
+  # Edge properties
+    edge_width:   int = 2
+    edge_color:   str = "#666666"
+    edge_style:   VisualStyle = VisualStyle.SOLID
+    show_edge_labels:   bool = False
+    show_arrows:   bool = True
 
-    # Layout properties
-    layout_algorithm: LayoutAlgorithm = LayoutAlgorithm.FORCE_DIRECTED
-    force_strength: float = 0.1
-    repulsion_strength: float = 100.0
+  # Layout properties
+    layout_algorithm:   LayoutAlgorithm = LayoutAlgorithm.FORCE_DIRECTED
+    force_strength:   float = 0.1
+    repulsion_strength:   float = 100.0
 
-    # Canvas properties
-    canvas_width: int = 800
-    canvas_height: int = 600
-    background_color: str = "#FFFFFF"
+  # Canvas properties
+    canvas_width:   int = 800
+    canvas_height:   int = 600
+    background_color:   str = "#FFFFFF"
 
-    # Interaction properties
-    enable_drag: bool = True
-    enable_zoom: bool = True
-    enable_pan: bool = True
-
+  # Interaction properties
+    enable_drag:   bool = True
+    enable_zoom:   bool = True
+    enable_pan:   bool = True
 
 @dataclass
-class VisualMapping:
+class VisualMapping: 
     """Data-driven visual mapping configuration."""
-    node_size_mapping: Optional[str] = None  # Attribute name
-    node_color_mapping: Optional[str] = None  # Attribute name
-    edge_width_mapping: Optional[str] = None  # Attribute name
-    edge_color_mapping: Optional[str] = None  # Attribute name
+    node_size_mapping:   Optional[str] = None  # Attribute name
+    node_color_mapping:   Optional[str] = None  # Attribute name
+    edge_width_mapping:   Optional[str] = None  # Attribute name
+    edge_color_mapping:   Optional[str] = None  # Attribute name
 
-    # Color schemes
-    color_scheme: str = "viridis"  # viridis, plasma, inferno, etc.
+  # Color schemes
+    color_scheme:   str = "viridis"  # viridis, plasma, inferno, etc.
 
-    # Size ranges
-    min_node_size: int = 10
-    max_node_size: int = 50
-    min_edge_width: int = 1
-    max_edge_width: int = 10
+  # Size ranges
+    min_node_size:   int = 10
+    max_node_size:   int = 50
+    min_edge_width:   int = 1
+    max_edge_width:   int = 10
 
-
-class GraphRenderer:
+class GraphRenderer: 
     """
     High-performance graph renderer with interactive features.
     Implements the Graph Visualization specification.
     """
 
-    def __init__(self, config: Optional[VisualConfig] = None):
+    def __init__(self, config:   Optional[VisualConfig] = None): 
         """Initialize the renderer with configuration."""
         self.config = config or VisualConfig()
         self.visual_mapping = VisualMapping()
-        self.graph_data: Optional[GraphData] = None
-        self.node_positions: Dict[str, Tuple[float, float]] = {}
-        self.selected_elements: set = set()
-        self.highlighted_elements: set = set()
-        self.filtered_elements: set = set()
+        self.graph_data:   Optional[GraphData] = None
+        self.node_positions:   Dict[str, Tuple[float, float]] = {}
+        self.selected_elements:   set = set()
+        self.highlighted_elements:   set = set()
+        self.filtered_elements:   set = set()
 
-        # Event callbacks
-        self.on_node_click: Optional[Callable[[str], None]] = None
-        self.on_edge_click: Optional[Callable[[str], None]] = None
-        self.on_selection_change: Optional[Callable[[set], None]] = None
+  # Event callbacks
+        self.on_node_click:   Optional[Callable[[str], None]] = None
+        self.on_edge_click:   Optional[Callable[[str], None]] = None
+        self.on_selection_change:   Optional[Callable[[set], None]] = None
 
         logger.info("GraphRenderer initialized")
 
-    def initialize(self) -> bool:
+    def initialize(self) -> bool: 
         """
         Initialize the renderer.
-        
-        Returns:
-            bool: True if initialization successful
+
+        Returns: 
+            bool:   True if initialization successful
         """
-        try:
-            # Reset all state
+        try: 
+  # Reset all state
             self.node_positions.clear()
             self.selected_elements.clear()
             self.highlighted_elements.clear()
             self.filtered_elements.clear()
-            
+
             logger.info("GraphRenderer initialized successfully")
             return True
-        except Exception as e:
-            logger.error(f"Failed to initialize renderer: {e}")
+        except Exception as e: 
+            logger.error(f"Failed to initialize renderer:   {e}")
             return False
 
-    def set_graph_data(self, graph_data: GraphData) -> None:
+    def set_graph_data(self, graph_data:   GraphData) -> None: 
         """Set the graph data to render."""
         self.graph_data = graph_data
         self._initialize_positions()
         logger.info(f"Graph data set with {len(graph_data.nodes)} nodes and {len(graph_data.edges)} edges")
 
-    def _initialize_positions(self) -> None:
+    def _initialize_positions(self) -> None: 
         """Initialize node positions based on layout algorithm."""
-        if not self.graph_data:
+        if not self.graph_data or not self.graph_data.nodes:  
             return
 
-        if self.config.layout_algorithm == LayoutAlgorithm.RANDOM:
+  # Use the correct config structure
+        layout_algorithm = self.config.layout.algorithm if hasattr(self.config, 'layout') else LayoutAlgorithm.FORCE_DIRECTED
+
+        if layout_algorithm == LayoutAlgorithm.RANDOM:  
             self._random_layout()
-        elif self.config.layout_algorithm == LayoutAlgorithm.CIRCULAR:
+        elif layout_algorithm == LayoutAlgorithm.CIRCULAR:  
             self._circular_layout()
-        elif self.config.layout_algorithm == LayoutAlgorithm.HIERARCHICAL:
+        elif layout_algorithm == LayoutAlgorithm.HIERARCHICAL:  
             self._hierarchical_layout()
-        else:  # Force-directed as default
+        else: 
+  # Default to force-directed
             self._force_directed_layout()
 
-    def _random_layout(self) -> None:
+    def _random_layout(self) -> None: 
         """Random layout for initial positioning."""
         import random
 
-        if not self.graph_data or not self.graph_data.nodes:
+        if not self.graph_data or not self.graph_data.nodes:  
             return
 
-        for node in self.graph_data.nodes:
-            x = random.uniform(50, self.config.canvas_width - 50)
-            y = random.uniform(50, self.config.canvas_height - 50)
+        for node in self.graph_data.nodes:  
+            x = random.uniform(50, self._get_canvas_width() - 50)
+            y = random.uniform(50, self._get_canvas_height() - 50)
             self.node_positions[node.id] = (x, y)
 
-    def _circular_layout(self) -> None:
+    def _circular_layout(self) -> None: 
         """Circular layout positioning."""
-        if not self.graph_data or not self.graph_data.nodes:
+        if not self.graph_data or not self.graph_data.nodes:  
             return
 
-        center_x = self.config.canvas_width / 2
-        center_y = self.config.canvas_height / 2
-        radius = min(self.config.canvas_width, self.config.canvas_height) / 3
+        center_x = self._get_canvas_width() / 2
+        center_y = self._get_canvas_height() / 2
+        radius = min(self._get_canvas_width(), self._get_canvas_height()) / 3
 
         angle_step = 2 * math.pi / len(self.graph_data.nodes)
 
-        for i, node in enumerate(self.graph_data.nodes):
+        for i, node in enumerate(self.graph_data.nodes): 
             angle = i * angle_step
             x = center_x + radius * math.cos(angle)
             y = center_y + radius * math.sin(angle)
             self.node_positions[node.id] = (x, y)
 
-    def _hierarchical_layout(self) -> None:
+    def _hierarchical_layout(self) -> None: 
         """Hierarchical layout positioning."""
-        if not self.graph_data or not self.graph_data.nodes:
+        if not self.graph_data or not self.graph_data.nodes:  
             return
 
-        # Simple hierarchical layout - can be enhanced
+  # Simple hierarchical layout - can be enhanced
         levels = self._calculate_hierarchy_levels()
 
-        for level, nodes in levels.items():
+        for level, nodes in levels.items(): 
             y = 50 + level * 100
-            x_step = self.config.canvas_width / (len(nodes) + 1)
+            x_step = self._get_canvas_width() / (len(nodes) + 1)
 
-            for i, node in enumerate(nodes):
+            for i, node in enumerate(nodes): 
                 x = x_step * (i + 1)
                 self.node_positions[node.id] = (x, y)
 
-    def _calculate_hierarchy_levels(self) -> Dict[int, List[Node]]:
+    def _calculate_hierarchy_levels(self) -> Dict[int, List[Node]]: 
         """Calculate hierarchy levels for nodes."""
-        # Simple implementation - can be enhanced with proper graph analysis
-        if not self.graph_data or not self.graph_data.nodes:
-            return {0: []}
+  # Simple implementation - can be enhanced with proper graph analysis
+        if not self.graph_data or not self.graph_data.nodes:  
+            return {0:   []}
 
-        levels: Dict[int, List[Node]] = {0: []}
+        levels:   Dict[int, List[Node]] = {0:   []}
         processed = set()
 
-        # Start with nodes that have no incoming edges
-        for node in self.graph_data.nodes:
+  # Start with nodes that have no incoming edges
+        for node in self.graph_data.nodes:  
             incoming_edges = [e for e in self.graph_data.edges if e.target == node.id]
-            if not incoming_edges:
+            if not incoming_edges: 
                 levels[0].append(node)
                 processed.add(node.id)
 
-        # Assign remaining nodes to levels
+  # Assign remaining nodes to levels
         current_level = 1
-        while len(processed) < len(self.graph_data.nodes):
-            if current_level not in levels:
+        while len(processed) < len(self.graph_data.nodes): 
+            if current_level not in levels: 
                 levels[current_level] = []
 
-            for node in self.graph_data.nodes:
-                if node.id in processed:
+            for node in self.graph_data.nodes:  
+                if node.id in processed: 
                     continue
 
                 incoming_edges = [e for e in self.graph_data.edges if e.target == node.id]
-                if all(e.source in processed for e in incoming_edges):
+                if all(e.source in processed for e in incoming_edges): 
                     levels[current_level].append(node)
                     processed.add(node.id)
 
@@ -227,368 +226,380 @@ class GraphRenderer:
 
         return levels
 
-    def _force_directed_layout(self) -> None:
+    def _force_directed_layout(self) -> None: 
         """Force-directed layout using Fruchterman-Reingold algorithm."""
-        if not self.graph_data or not self.graph_data.nodes:
+        if not self.graph_data or not self.graph_data.nodes:  
             return
 
-        # Initialize random positions
+  # Initialize random positions
         self._random_layout()
 
-        # Simple force-directed layout iteration
+  # Simple force-directed layout iteration
         iterations = 50
-        for _ in range(iterations):
+        for _ in range(iterations): 
             self._apply_force_directed_forces()
 
-    def _apply_force_directed_forces(self) -> None:
+    def _apply_force_directed_forces(self) -> None: 
         """Apply force-directed layout forces."""
-        if not self.graph_data:
+        if not self.graph_data:  
             return
 
-        # Calculate repulsive forces between all nodes
-        forces = {node.id: (0.0, 0.0) for node in self.graph_data.nodes}
+  # Calculate repulsive forces between all nodes
+        forces = {node.id:   (0.0, 0.0) for node in self.graph_data.nodes}
 
-        # Repulsive forces
-        for i, node1 in enumerate(self.graph_data.nodes):
-            for j, node2 in enumerate(self.graph_data.nodes):
-                if i >= j:
+  # Apply forces between nodes
+        for i, node1 in enumerate(self.graph_data.nodes): 
+            for j, node2 in enumerate(self.graph_data.nodes): 
+                if i >= j: 
                     continue
 
-                pos1 = self.node_positions[node1.id]
-                pos2 = self.node_positions[node2.id]
+                x1, y1 = self.node_positions[node1.id]
+                x2, y2 = self.node_positions[node2.id]
 
-                dx = pos2[0] - pos1[0]
-                dy = pos2[1] - pos1[1]
+  # Calculate distance
+                dx = x2 - x1
+                dy = y2 - y1
                 distance = math.sqrt(dx * dx + dy * dy)
 
-                if distance > 0:
-                    # Repulsive force
-                    force = self.config.repulsion_strength / (distance * distance)
-                    fx = (dx / distance) * force
-                    fy = (dy / distance) * force
+                if distance < 1: 
+                    distance = 1
 
-                    forces[node1.id] = (forces[node1.id][0] - fx, forces[node1.id][1] - fy)
-                    forces[node2.id] = (forces[node2.id][0] + fx, forces[node2.id][1] + fy)
+  # Repulsive force (nodes repel each other)
+                repulsion_force = self._get_repulsion_strength() / (distance * distance)
+                fx = (dx / distance) * repulsion_force
+                fy = (dy / distance) * repulsion_force
 
-        # Attractive forces for connected nodes
-        for edge in self.graph_data.edges:
-            if edge.source in self.node_positions and edge.target in self.node_positions:
-                pos1 = self.node_positions[edge.source]
-                pos2 = self.node_positions[edge.target]
+  # Apply forces
+                forces[node1.id] = (forces[node1.id][0] - fx, forces[node1.id][1] - fy)
+                forces[node2.id] = (forces[node2.id][0] + fx, forces[node2.id][1] + fy)
 
-                dx = pos2[0] - pos1[0]
-                dy = pos2[1] - pos1[1]
+  # Apply forces from edges (attractive)
+        for edge in self.graph_data.edges:  
+            if edge.source in self.node_positions and edge.target in self.node_positions:  
+                x1, y1 = self.node_positions[edge.source]
+                x2, y2 = self.node_positions[edge.target]
+
+                dx = x2 - x1
+                dy = y2 - y1
                 distance = math.sqrt(dx * dx + dy * dy)
 
-                if distance > 0:
-                    # Attractive force
-                    force = self.config.force_strength * distance
-                    fx = (dx / distance) * force
-                    fy = (dy / distance) * force
+                if distance < 1: 
+                    distance = 1
 
-                    forces[edge.source] = (forces[edge.source][0] + fx, forces[edge.source][1] + fy)
-                    forces[edge.target] = (forces[edge.target][0] - fx, forces[edge.target][1] - fy)
+  # Attractive force (connected nodes attract each other)
+                attractive_force = self._get_force_strength() * distance
+                fx = (dx / distance) * attractive_force
+                fy = (dy / distance) * attractive_force
 
-        # Apply forces with damping
+  # Apply forces
+                forces[edge.source] = (forces[edge.source][0] + fx, forces[edge.source][1] + fy)
+                forces[edge.target] = (forces[edge.target][0] - fx, forces[edge.target][1] - fy)
+
+  # Apply forces with damping
         damping = 0.1
-        for node_id, (fx, fy) in forces.items():
-            if node_id in self.node_positions:
+        for node_id, (fx, fy) in forces.items(): 
+            if node_id in self.node_positions:  
                 x, y = self.node_positions[node_id]
                 new_x = x + fx * damping
                 new_y = y + fy * damping
 
-                # Keep nodes within canvas bounds
-                new_x = max(50, min(self.config.canvas_width - 50, new_x))
-                new_y = max(50, min(self.config.canvas_height - 50, new_y))
+  # Keep nodes within canvas bounds
+                new_x = max(50, min(self._get_canvas_width() - 50, new_x))
+                new_y = max(50, min(self._get_canvas_height() - 50, new_y))
 
                 self.node_positions[node_id] = (new_x, new_y)
 
-    def set_layout_algorithm(self, algorithm: LayoutAlgorithm) -> None:
-        """Change the layout algorithm and recalculate positions."""
-        self.config.layout_algorithm = algorithm
+    def set_layout_algorithm(self, algorithm:   LayoutAlgorithm) -> None: 
+        """Set the layout algorithm."""
+        if hasattr(self.config, 'layout'): 
+            self.config.layout.algorithm = algorithm
+        else: 
+  # Fallback for old config structure
+            self.config.layout_algorithm = algorithm
         self._initialize_positions()
         logger.info(f"Layout algorithm changed to {algorithm.value}")
 
-    def set_visual_mapping(self, mapping: VisualMapping) -> None:
+    def set_visual_mapping(self, mapping:   VisualMapping) -> None: 
         """Set data-driven visual mapping configuration."""
         self.visual_mapping = mapping
         logger.info("Visual mapping configuration updated")
 
-    def select_element(self, element_id: str, element_type: str = "node") -> None:
+    def select_element(self, element_id:   str, element_type:   str = "node") -> None: 
         """Select a node or edge."""
-        element_key = f"{element_type}:{element_id}"
+        element_key = f"{element_type}: {element_id}"
         self.selected_elements.add(element_key)
 
-        if self.on_selection_change:
+        if self.on_selection_change:  
             self.on_selection_change(self.selected_elements)
 
-        logger.info(f"Selected {element_type}: {element_id}")
+        logger.info(f"Selected {element_type}:  {element_id}")
 
-    def deselect_element(self, element_id: str, element_type: str = "node") -> None:
+    def deselect_element(self, element_id:   str, element_type:   str = "node") -> None: 
         """Deselect a node or edge."""
-        element_key = f"{element_type}:{element_id}"
+        element_key = f"{element_type}: {element_id}"
         self.selected_elements.discard(element_key)
 
-        if self.on_selection_change:
+        if self.on_selection_change:  
             self.on_selection_change(self.selected_elements)
 
-    def clear_selection(self) -> None:
+    def clear_selection(self) -> None: 
         """Clear all selections."""
         self.selected_elements.clear()
 
-        if self.on_selection_change:
+        if self.on_selection_change:  
             self.on_selection_change(self.selected_elements)
 
-    def highlight_elements(self, element_ids: List[str], element_type: str = "node") -> None:
+    def highlight_elements(self, element_ids:   List[str], element_type:   str = "node") -> None: 
         """Highlight specific elements."""
-        for element_id in element_ids:
-            element_key = f"{element_type}:{element_id}"
+        for element_id in element_ids: 
+            element_key = f"{element_type}: {element_id}"
             self.highlighted_elements.add(element_key)
 
-    def clear_highlights(self) -> None:
+    def clear_highlights(self) -> None: 
         """Clear all highlights."""
         self.highlighted_elements.clear()
 
-    def filter_elements(self, filter_func: Callable[[Any], bool], element_type: str = "node") -> None:
+    def filter_elements(self, filter_func:   Callable[[Any], bool], element_type:   str = "node") -> None: 
         """Filter elements based on a function."""
-        if not self.graph_data:
+        if not self.graph_data:  
             return
 
-        if element_type == "node":
-            elements: List[Node] = self.graph_data.nodes
-        else:
-            elements: List[Edge] = self.graph_data.edges
+        if element_type == "node": 
+            elements:   List[Node] = self.graph_data.nodes
+        else: 
+            elements:   List[Edge] = self.graph_data.edges
 
         self.filtered_elements = {
-            f"{element_type}:{elem.id}" for elem in elements if filter_func(elem)
+            f"{element_type}: {elem.id}" for elem in elements if filter_func(elem)
         }
 
-    def clear_filters(self) -> None:
+    def clear_filters(self) -> None: 
         """Clear all filters."""
         self.filtered_elements.clear()
 
-    def get_node_position(self, node_id: str) -> Optional[Tuple[float, float]]:
+    def get_node_position(self, node_id:   str) -> Optional[Tuple[float, float]]: 
         """Get the position of a specific node."""
         return self.node_positions.get(node_id)
 
-    def set_node_position(self, node_id: str, x: float, y: float) -> None:
+    def set_node_position(self, node_id:   str, x:   float, y:   float) -> None: 
         """Set the position of a specific node (for drag and drop)."""
         self.node_positions[node_id] = (x, y)
 
-    def render(self) -> Dict[str, Any]:
+    def render(self) -> Dict[str, Any]: 
         """
         Render the graph and return visualization data.
         This would typically return data for a frontend renderer.
         """
-        if not self.graph_data:
-            return {"error": "No graph data available"}
+        if not self.graph_data:  
+            return {"error":  "No graph data available"}
 
-        # Prepare rendering data
+  # Prepare rendering data
         nodes_data = []
-        for node in self.graph_data.nodes:
-            if f"node:{node.id}" in self.filtered_elements:
+        for node in self.graph_data.nodes:  
+            if f"node:  {node.id}" in self.filtered_elements:  
                 continue
 
             pos = self.node_positions.get(node.id, (0, 0))
 
-            # Apply visual mapping
+  # Apply visual mapping
             size = self._get_mapped_node_size(node)
             color = self._get_mapped_node_color(node)
 
             node_data = {
-                "id": node.id,
-                "x": pos[0],
-                "y": pos[1],
-                "size": size,
-                "color": color,
-                "shape": self.config.node_shape,
-                "label": node.name if self.config.show_node_labels else "",
-                "attributes": node.attributes,
-                "selected": f"node:{node.id}" in self.selected_elements,
-                "highlighted": f"node:{node.id}" in self.highlighted_elements
+                "id":  node.id,
+                "x":  pos[0],
+                "y":  pos[1],
+                "size":  size,
+                "color":  color,
+                "shape":  self._get_node_shape(),
+                "showLabels":  self._get_show_node_labels(),
+                "label":  node.name if self._get_show_node_labels() else "",
+                "attributes":  node.attributes,
+                "selected":  f"node:  {node.id}" in self.selected_elements,
+                "highlighted":  f"node:  {node.id}" in self.highlighted_elements
             }
             nodes_data.append(node_data)
 
         edges_data = []
-        for edge in self.graph_data.edges:
-            if f"edge:{edge.id}" in self.filtered_elements:
+        for edge in self.graph_data.edges:  
+            if f"edge:  {edge.id}" in self.filtered_elements:  
                 continue
 
             source_pos = self.node_positions.get(edge.source)
             target_pos = self.node_positions.get(edge.target)
 
-            if not source_pos or not target_pos:
+            if not source_pos or not target_pos: 
                 continue
 
-            # Apply visual mapping
+  # Apply visual mapping
             width = self._get_mapped_edge_width(edge)
             color = self._get_mapped_edge_color(edge)
 
             edge_data = {
-                "id": edge.id,
-                "source": edge.source,
-                "target": edge.target,
-                "sourceX": source_pos[0],
-                "sourceY": source_pos[1],
-                "targetX": target_pos[0],
-                "targetY": target_pos[1],
-                "width": width,
-                "color": color,
-                "style": self.config.edge_style.value,
-                "label": edge.relationship_type if self.config.show_edge_labels else "",
-                "attributes": edge.attributes,
-                "selected": f"edge:{edge.id}" in self.selected_elements,
-                "highlighted": f"edge:{edge.id}" in self.highlighted_elements,
-                "showArrow": self.config.show_arrows
+                "id":  edge.id,
+                "source":  edge.source,
+                "target":  edge.target,
+                "sourceX":  source_pos[0],
+                "sourceY":  source_pos[1],
+                "targetX":  target_pos[0],
+                "targetY":  target_pos[1],
+                "width":  width,
+                "color":  color,
+                "style":  self.config.edge_style.value,
+                "label":  edge.relationship_type if self.config.show_edge_labels else "",
+                "attributes":  edge.attributes,
+                "selected":  f"edge:  {edge.id}" in self.selected_elements,
+                "highlighted":  f"edge:  {edge.id}" in self.highlighted_elements,
+                "showArrow":  self.config.show_arrows
             }
             edges_data.append(edge_data)
 
         return {
-            "nodes": nodes_data,
-            "edges": edges_data,
-            "config": {
-                "canvasWidth": self.config.canvas_width,
-                "canvasHeight": self.config.canvas_height,
-                "backgroundColor": self.config.background_color,
-                "enableDrag": self.config.enable_drag,
-                "enableZoom": self.config.enable_zoom,
-                "enablePan": self.config.enable_pan
+            "nodes":  nodes_data,
+            "edges":  edges_data,
+            "config":  {
+                "canvasWidth":  self._get_canvas_width(),
+                "canvasHeight":  self._get_canvas_height(),
+                "backgroundColor":  self._get_background_color(),
+                "enableDrag":  self._get_enable_drag(),
+                "enableZoom":  self._get_enable_zoom(),
+                "enablePan":  self._get_enable_pan()
             }
         }
 
-    def render_frame(self, graph_data, highlights=None) -> Dict[str, Any]:
+    def render_frame(self, graph_data, highlights=None) -> Dict[str, Any]: 
         """
         Render a frame of the graph visualization.
-        
-        Args:
-            graph_data: Graph data to render
-            highlights: Optional highlight information
-            
-        Returns:
+
+        Args: 
+            graph_data:   Graph data to render
+            highlights:   Optional highlight information
+
+        Returns: 
             Dict containing render statistics and data
         """
-        try:
-            if graph_data:
+        try: 
+            if graph_data: 
                 self.set_graph_data(graph_data)
-            
-            if highlights:
-                for highlight_id in highlights:
+
+            if highlights: 
+                for highlight_id in highlights: 
                     self.highlighted_elements.add(highlight_id)
-            
-            # Generate the render data
+
+  # Generate the render data
             render_data = self.render()
-            
+
             return {
-                'success': True,
-                'frame_data': render_data,
-                'node_count': len(graph_data.nodes) if graph_data else 0,
-                'edge_count': len(graph_data.edges) if graph_data else 0,
-                'highlights_count': len(highlights) if highlights else 0,
-                'timestamp': datetime.now().isoformat()
-            }
-            
-        except Exception as e:
-            logger.error(f"Error rendering frame: {e}")
-            return {
-                'success': False,
-                'error': str(e),
-                'node_count': 0,
-                'edge_count': 0
+                'success':  True,
+                'frame_data':  render_data,
+                'node_count':  len(graph_data.nodes) if graph_data else 0,
+                'edge_count':  len(graph_data.edges) if graph_data else 0,
+                'highlights_count':  len(highlights) if highlights else 0,
+                'timestamp':  datetime.now().isoformat()
             }
 
-    def _get_mapped_node_size(self, node: Node) -> int:
+        except Exception as e: 
+            logger.error(f"Error rendering frame:   {e}")
+            return {
+                'success':  False,
+                'error':  str(e),
+                'node_count':  0,
+                'edge_count':  0
+            }
+
+    def _get_mapped_node_size(self, node:   Node) -> int: 
         """Get node size based on visual mapping."""
-        if not self.visual_mapping.node_size_mapping:
-            return self.config.node_size
+        if not self.visual_mapping.node_size_mapping:  
+            return self._get_node_size()
 
         value = node.attributes.get(self.visual_mapping.node_size_mapping, 0)
-        if isinstance(value, (int, float)):
-            # Normalize to size range
+        if isinstance(value, (int, float)): 
+  # Normalize to size range
             normalized = (value - 0) / (100 - 0)  # Assuming 0-100 range
             size = self.visual_mapping.min_node_size + normalized * (
                 self.visual_mapping.max_node_size - self.visual_mapping.min_node_size
             )
             return int(size)
 
-        return self.config.node_size
+        return self._get_node_size()
 
-    def _get_mapped_node_color(self, node: Node) -> str:
+    def _get_mapped_node_color(self, node:   Node) -> str: 
         """Get node color based on visual mapping."""
-        if not self.visual_mapping.node_color_mapping:
-            return self.config.node_color
+        if not self.visual_mapping.node_color_mapping:  
+            return self._get_node_color()
 
         value = node.attributes.get(self.visual_mapping.node_color_mapping, 0)
-        # Simple color mapping - can be enhanced with proper color schemes
-        if isinstance(value, (int, float)):
+  # Simple color mapping - can be enhanced with proper color schemes
+        if isinstance(value, (int, float)): 
             normalized = (value - 0) / (100 - 0)
-            # Simple color interpolation
+  # Simple color interpolation
             r = int(74 + normalized * 181)  # 4A to FF
             g = int(144 + normalized * 111)  # 90 to FF
-            b = int(226 + normalized * 29)   # E2 to FF
+            b = int(226 + normalized * 29)  # E2 to FF
             return f"#{r:02x}{g:02x}{b:02x}"
 
-        return self.config.node_color
+        return self._get_node_color()
 
-    def _get_mapped_edge_width(self, edge: Edge) -> int:
+    def _get_mapped_edge_width(self, edge:   Edge) -> int: 
         """Get edge width based on visual mapping."""
-        if not self.visual_mapping.edge_width_mapping:
-            return self.config.edge_width
+        if not self.visual_mapping.edge_width_mapping:  
+            return self._get_edge_width()
 
         value = edge.attributes.get(self.visual_mapping.edge_width_mapping, 0)
-        if isinstance(value, (int, float)):
+        if isinstance(value, (int, float)): 
             normalized = (value - 0) / (100 - 0)
             width = self.visual_mapping.min_edge_width + normalized * (
                 self.visual_mapping.max_edge_width - self.visual_mapping.min_edge_width
             )
             return int(width)
 
-        return self.config.edge_width
+        return self._get_edge_width()
 
-    def _get_mapped_edge_color(self, edge: Edge) -> str:
+    def _get_mapped_edge_color(self, edge:   Edge) -> str: 
         """Get edge color based on visual mapping."""
-        if not self.visual_mapping.edge_color_mapping:
-            return self.config.edge_color
+        if not self.visual_mapping.edge_color_mapping:  
+            return self._get_edge_color()
 
         value = edge.attributes.get(self.visual_mapping.edge_color_mapping, 0)
-        if isinstance(value, (int, float)):
+        if isinstance(value, (int, float)): 
             normalized = (value - 0) / (100 - 0)
-            # Simple color interpolation
+  # Simple color interpolation
             r = int(102 + normalized * 153)  # 66 to FF
             g = int(102 + normalized * 153)  # 66 to FF
             b = int(102 + normalized * 153)  # 66 to FF
             return f"#{r:02x}{g:02x}{b:02x}"
 
-        return self.config.edge_color
+        return self._get_edge_color()
 
-    def export_visualization(self, format: str = "json") -> str:
+    def export_visualization(self, format:   str = "json") -> str: 
         """Export visualization data in specified format."""
         render_data = self.render()
 
-        if format == "json":
+        if format == "json": 
             return json.dumps(render_data, indent=2)
-        elif format == "svg":
+        elif format == "svg": 
             return self._generate_svg(render_data)
-        else:
-            raise ValueError(f"Unsupported export format: {format}")
+        else: 
+            raise ValueError(f"Unsupported export format:   {format}")
 
-    def _generate_svg(self, render_data: Dict[str, Any]) -> str:
+    def _generate_svg(self, render_data:   Dict[str, Any]) -> str: 
         """Generate SVG representation of the graph."""
         svg_parts = [
-            f'<svg width="{self.config.canvas_width}" height="{self.config.canvas_height}" xmlns="http://www.w3.org/2000/svg">',
-            f'<rect width="100%" height="100%" fill="{self.config.background_color}"/>'
+            f'<svg width="{self._get_canvas_width()}" height="{self._get_canvas_height()}" xmlns="http:  //www.w3.org/2000/svg">',
+            f'<rect width="100%" height="100%" fill="{self._get_background_color()}"/>'
         ]
 
-        # Add edges
-        for edge in render_data["edges"]:
+  # Add edges
+        for edge in render_data["edges"]: 
             svg_parts.append(
                 f'<line x1="{edge["sourceX"]}" y1="{edge["sourceY"]}" '
                 f'x2="{edge["targetX"]}" y2="{edge["targetY"]}" '
                 f'stroke="{edge["color"]}" stroke-width="{edge["width"]}"/>'
             )
 
-        # Add nodes
-        for node in render_data["nodes"]:
-            if node["shape"] == "circle":
+  # Add nodes
+        for node in render_data["nodes"]: 
+            if node["shape"] == "circle": 
                 svg_parts.append(
                     f'<circle cx="{node["x"]}" cy="{node["y"]}" r="{node["size"]}" '
                     f'fill="{node["color"]}" stroke="#000000" stroke-width="1"/>'
@@ -601,8 +612,8 @@ class GraphRenderer:
                     f'fill="{node["color"]}" stroke="#000000" stroke-width="1"/>'
                 )
 
-            # Add label
-            if node["label"]:
+  # Add label
+            if node["label"]: 
                 svg_parts.append(
                     f'<text x="{node["x"]}" y="{node["y"] + node["size"] + 15}" '
                     f'text-anchor="middle" font-size="{self.config.node_label_size}">{node["label"]}</text>'
@@ -611,15 +622,158 @@ class GraphRenderer:
         svg_parts.append('</svg>')
         return '\n'.join(svg_parts)
 
+    def _get_canvas_width(self) -> int: 
+        """Get canvas width from config, handling both old and new config structures."""
+        if hasattr(self.config, 'canvas') and hasattr(self.config.canvas, 'width'): 
+            return self.config.canvas.width
+        elif hasattr(self.config, 'canvas_width'): 
+            return self.config.canvas_width
+        else: 
+            return 800  # Default fallback
 
-def create_renderer(config: Optional[VisualConfig] = None) -> GraphRenderer:
+    def _get_canvas_height(self) -> int: 
+        """Get canvas height from config, handling both old and new config structures."""
+        if hasattr(self.config, 'canvas') and hasattr(self.config.canvas, 'height'): 
+            return self.config.canvas.height
+        elif hasattr(self.config, 'canvas_height'): 
+            return self.config.canvas_height
+        else: 
+            return 600  # Default fallback
+
+    def _get_background_color(self) -> str: 
+        """Get background color from config, handling both old and new config structures."""
+        if hasattr(self.config, 'canvas') and hasattr(self.config.canvas, 'background_color'): 
+            return self.config.canvas.background_color
+        elif hasattr(self.config, 'background_color'): 
+            return self.config.background_color
+        else: 
+            return "#FFFFFF"  # Default fallback
+
+    def _get_repulsion_strength(self) -> float: 
+        """Get repulsion strength from config, handling both old and new config structures."""
+        if hasattr(self.config, 'layout') and hasattr(self.config.layout, 'repulsion_strength'): 
+            return self.config.layout.repulsion_strength
+        elif hasattr(self.config, 'repulsion_strength'): 
+            return self.config.repulsion_strength
+        else: 
+            return 100.0  # Default fallback
+
+    def _get_force_strength(self) -> float: 
+        """Get force strength from config, handling both old and new config structures."""
+        if hasattr(self.config, 'layout') and hasattr(self.config.layout, 'spring_strength'): 
+            return self.config.layout.spring_strength
+        elif hasattr(self.config, 'force_strength'): 
+            return self.config.force_strength
+        else: 
+            return 0.1  # Default fallback
+
+    def _get_node_size(self) -> int: 
+        """Get node size from config, handling both old and new config structures."""
+        if hasattr(self.config, 'node_style') and hasattr(self.config.node_style, 'size'): 
+            return int(self.config.node_style.size)
+        elif hasattr(self.config, 'node_size'): 
+            return self.config.node_size
+        else: 
+            return 20  # Default fallback
+
+    def _get_node_color(self) -> str: 
+        """Get node color from config, handling both old and new config structures."""
+        if hasattr(self.config, 'node_style') and hasattr(self.config.node_style, 'color'): 
+            return self.config.node_style.color
+        elif hasattr(self.config, 'node_color'): 
+            return self.config.node_color
+        else: 
+            return "#4A90E2"  # Default fallback
+
+    def _get_edge_width(self) -> int: 
+        """Get edge width from config, handling both old and new config structures."""
+        if hasattr(self.config, 'edge_style') and hasattr(self.config.edge_style, 'width'): 
+            return int(self.config.edge_style.width)
+        elif hasattr(self.config, 'edge_width'): 
+            return self.config.edge_width
+        else: 
+            return 2  # Default fallback
+
+    def _get_edge_color(self) -> str: 
+        """Get edge color from config, handling both old and new config structures."""
+        if hasattr(self.config, 'edge_style') and hasattr(self.config.edge_style, 'color'): 
+            return self.config.edge_style.color
+        elif hasattr(self.config, 'edge_color'): 
+            return self.config.edge_color
+        else: 
+            return "#666666"  # Default fallback
+
+    def _get_node_shape(self) -> str: 
+        """Get node shape from config, handling both old and new config structures."""
+        if hasattr(self.config, 'node_style') and hasattr(self.config.node_style, 'shape'): 
+            return self.config.node_style.shape
+        elif hasattr(self.config, 'node_shape'): 
+            return self.config.node_shape
+        else: 
+            return "circle"  # Default fallback
+
+    def _get_show_node_labels(self) -> bool: 
+        """Get show node labels from config, handling both old and new config structures."""
+        if hasattr(self.config, 'node_style') and hasattr(self.config.node_style, 'show_node_labels'): 
+            return self.config.node_style.show_node_labels
+        elif hasattr(self.config, 'show_node_labels'): 
+            return self.config.show_node_labels
+        else: 
+            return True  # Default fallback
+
+    def _get_show_edge_labels(self) -> bool: 
+        """Get show edge labels from config, handling both old and new config structures."""
+        if hasattr(self.config, 'edge_style') and hasattr(self.config.edge_style, 'show_edge_labels'): 
+            return self.config.edge_style.show_edge_labels
+        elif hasattr(self.config, 'show_edge_labels'): 
+            return self.config.show_edge_labels
+        else: 
+            return False  # Default fallback
+
+    def _get_show_arrows(self) -> bool: 
+        """Get show arrows from config, handling both old and new config structures."""
+        if hasattr(self.config, 'edge_style') and hasattr(self.config.edge_style, 'show_arrows'): 
+            return self.config.edge_style.show_arrows
+        elif hasattr(self.config, 'show_arrows'): 
+            return self.config.show_arrows
+        else: 
+            return True  # Default fallback
+
+    def _get_enable_drag(self) -> bool: 
+        """Get enable drag from config, handling both old and new config structures."""
+        if hasattr(self.config, 'interactions') and hasattr(self.config.interactions, 'enable_drag'): 
+            return self.config.interactions.enable_drag
+        elif hasattr(self.config, 'enable_drag'): 
+            return self.config.enable_drag
+        else: 
+            return True  # Default fallback
+
+    def _get_enable_zoom(self) -> bool: 
+        """Get enable zoom from config, handling both old and new config structures."""
+        if hasattr(self.config, 'interactions') and hasattr(self.config.interactions, 'enable_zoom'): 
+            return self.config.interactions.enable_zoom
+        elif hasattr(self.config, 'enable_zoom'): 
+            return self.config.enable_zoom
+        else: 
+            return True  # Default fallback
+
+    def _get_enable_pan(self) -> bool: 
+        """Get enable pan from config, handling both old and new config structures."""
+        if hasattr(self.config, 'interactions') and hasattr(self.config.interactions, 'enable_pan'): 
+            return self.config.interactions.enable_pan
+        elif hasattr(self.config, 'enable_pan'): 
+            return self.config.enable_pan
+        else: 
+            return True  # Default fallback
+
+def create_renderer(config:   Optional[VisualConfig] = None) -> GraphRenderer: 
     """
     Factory function to create a graph renderer instance.
-    
-    Args:
-        config: Optional visual configuration
-        
-    Returns:
-        GraphRenderer: Configured renderer instance
+
+    Args: 
+        config:   Optional visual configuration
+
+    Returns: 
+        GraphRenderer:   Configured renderer instance
     """
     return GraphRenderer(config)

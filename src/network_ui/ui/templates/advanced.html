@@ -1,0 +1,1742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network UI - Advanced Professional Interface</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --dark-bg: #0f172a;
+            --medium-bg: #1e293b;
+            --light-bg: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --border-color: #475569;
+            --accent-color: #06b6d4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        .app-layout {
+            height: 100vh;
+            display: grid;
+            grid-template-areas: 
+                "header header header"
+                "sidebar main properties"
+                "sidebar footer footer";
+            grid-template-columns: 320px 1fr 380px;
+            grid-template-rows: 60px 1fr 40px;
+        }
+
+        /* Header */
+        .header {
+            grid-area: header;
+            background: var(--medium-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 20px;
+        }
+
+        .header-brand {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 5px;
+            margin-left: auto;
+        }
+
+        .nav-button {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .nav-button:hover {
+            background: var(--light-bg);
+            color: var(--text-primary);
+        }
+
+        .nav-button.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            grid-area: sidebar;
+            background: var(--medium-bg);
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-tab {
+            flex: 1;
+            padding: 12px 8px;
+            text-align: center;
+            font-size: 12px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .sidebar-tab.active {
+            background: var(--dark-bg);
+            border-bottom-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .sidebar-content {
+            padding: 20px;
+        }
+
+        .sidebar-section {
+            display: none;
+        }
+
+        .sidebar-section.active {
+            display: block;
+        }
+
+        /* Main Canvas Area */
+        .main {
+            grid-area: main;
+            background: var(--dark-bg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .canvas-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        #mainCanvas {
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+
+        #mainCanvas:active {
+            cursor: grabbing;
+        }
+
+        .canvas-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .canvas-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .control-button {
+            background: rgba(30, 41, 59, 0.9);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-button:hover {
+            background: rgba(51, 65, 85, 0.9);
+        }
+
+        /* Properties Panel */
+        .properties {
+            grid-area: properties;
+            background: var(--medium-bg);
+            border-left: 1px solid var(--border-color);
+            overflow-y: auto;
+        }
+
+        .properties-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--light-bg);
+        }
+
+        .properties-content {
+            padding: 20px;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            background: var(--dark-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .form-range {
+            width: 100%;
+            height: 6px;
+            background: var(--dark-bg);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .form-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--light-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-full {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* Advanced Configuration Panels */
+        .config-section {
+            background: var(--dark-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .config-header {
+            padding: 16px 20px;
+            background: var(--light-bg);
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 600;
+        }
+
+        .config-content {
+            padding: 20px;
+            display: none;
+        }
+
+        .config-content.expanded {
+            display: block;
+        }
+
+        .parameter-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .parameter-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+
+        .parameter-value {
+            background: var(--dark-bg);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--accent-color);
+        }
+
+        /* Algorithm Configuration */
+        .algorithm-config {
+            background: var(--dark-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .algorithm-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .algorithm-card {
+            background: var(--medium-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .algorithm-card:hover {
+            border-color: var(--primary-color);
+        }
+
+        .algorithm-card.selected {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .algorithm-card i {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .algorithm-name {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Visual Mapping */
+        .visual-mapping {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+        }
+
+        .color-swatch {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .color-swatch:hover {
+            border-color: var(--text-primary);
+        }
+
+        .color-swatch.selected {
+            border-color: var(--accent-color);
+        }
+
+        /* Modal System */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--medium-bg);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            padding: 20px 30px;
+            background: var(--light-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 30px;
+            overflow-y: auto;
+            max-height: 70vh;
+        }
+
+        /* Advanced Data Import */
+        .import-wizard {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 30px;
+            height: 600px;
+        }
+
+        .wizard-nav {
+            background: var(--dark-bg);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .wizard-step {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 4px solid transparent;
+        }
+
+        .wizard-step.active {
+            background: var(--primary-color);
+            border-left-color: var(--accent-color);
+        }
+
+        .wizard-step.completed {
+            background: var(--success-color);
+        }
+
+        .wizard-content {
+            background: var(--dark-bg);
+            border-radius: 8px;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        /* Performance Monitor */
+        .performance-metrics {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .metric-card {
+            background: var(--dark-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Loading States */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            backdrop-filter: blur(5px);
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Footer */
+        .footer {
+            grid-area: footer;
+            background: var(--medium-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .status-indicators {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success-color);
+        }
+
+        .status-dot.warning {
+            background: var(--warning-color);
+        }
+
+        .status-dot.error {
+            background: var(--danger-color);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1400px) {
+            .app-layout {
+                grid-template-columns: 280px 1fr 320px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .app-layout {
+                grid-template-areas: 
+                    "header header"
+                    "main main"
+                    "footer footer";
+                grid-template-columns: 1fr;
+                grid-template-rows: 60px 1fr 40px;
+            }
+            
+            .sidebar, .properties {
+                position: fixed;
+                top: 60px;
+                bottom: 40px;
+                width: 320px;
+                z-index: 500;
+                transform: translateX(-100%);
+                transition: transform 0.3s;
+            }
+            
+            .sidebar.open, .properties.open {
+                transform: translateX(0);
+            }
+            
+            .properties {
+                right: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        /* Syntax Highlighting for Code Blocks */
+        .code-block {
+            background: var(--dark-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        /* Advanced Tooltips */
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 1000;
+            border: 1px solid var(--border-color);
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-brand">
+                <i class="fas fa-project-diagram"></i>
+                Network UI Pro
+            </div>
+            
+            <nav class="header-nav">
+                <button class="nav-button active" onclick="switchWorkspace('graph')">
+                    <i class="fas fa-network-wired"></i>
+                    Graph Studio
+                </button>
+                <button class="nav-button" onclick="switchWorkspace('analytics')">
+                    <i class="fas fa-chart-line"></i>
+                    Analytics Lab
+                </button>
+                <button class="nav-button" onclick="switchWorkspace('data')">
+                    <i class="fas fa-database"></i>
+                    Data Pipeline
+                </button>
+                <button class="nav-button" onclick="switchWorkspace('settings')">
+                    <i class="fas fa-cog"></i>
+                    Configuration
+                </button>
+            </nav>
+        </header>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-tabs">
+                <div class="sidebar-tab active" onclick="switchSidebarTab('tools')">Tools</div>
+                <div class="sidebar-tab" onclick="switchSidebarTab('layers')">Layers</div>
+                <div class="sidebar-tab" onclick="switchSidebarTab('history')">History</div>
+            </div>
+
+            <div class="sidebar-content">
+                <!-- Tools Panel -->
+                <div id="tools-panel" class="sidebar-section active">
+                    <div class="config-section">
+                        <div class="config-header" onclick="toggleSection(this)">
+                            <span><i class="fas fa-upload"></i> Data Import</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="config-content expanded">
+                            <button class="btn btn-primary btn-full" onclick="openAdvancedImport()">
+                                <i class="fas fa-file-import"></i>
+                                Advanced Import
+                            </button>
+                            <button class="btn btn-secondary btn-full" onclick="loadSampleData()">
+                                <i class="fas fa-download"></i>
+                                Load Sample Data
+                            </button>
+                            <div class="form-group">
+                                <label class="form-label">Recent Files</label>
+                                <div id="recent-files-list"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="config-section">
+                        <div class="config-header" onclick="toggleSection(this)">
+                            <span><i class="fas fa-eye"></i> Visualization</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="config-content">
+                            <div class="form-group">
+                                <label class="form-label">Rendering Engine</label>
+                                <select class="form-control" id="rendering-engine" onchange="updateRenderingEngine()">
+                                    <option value="canvas">HTML5 Canvas</option>
+                                    <option value="webgl">WebGL</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Layout Algorithm</label>
+                                <select class="form-control" id="layout-algorithm" onchange="applyLayout()">
+                                    <option value="force_directed">Force-Directed</option>
+                                    <option value="circular">Circular</option>
+                                    <option value="hierarchical">Hierarchical</option>
+                                    <option value="grid">Grid</option>
+                                    <option value="random">Random</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Performance Mode</label>
+                                <select class="form-control" id="performance-mode" onchange="updatePerformanceMode()">
+                                    <option value="quality">High Quality</option>
+                                    <option value="balanced">Balanced</option>
+                                    <option value="performance">High Performance</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="config-section">
+                        <div class="config-header" onclick="toggleSection(this)">
+                            <span><i class="fas fa-atom"></i> Analytics</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="config-content">
+                            <div class="algorithm-selector">
+                                <div class="algorithm-card" onclick="selectAlgorithm('centrality')">
+                                    <i class="fas fa-circle-notch"></i>
+                                    <div class="algorithm-name">Centrality</div>
+                                </div>
+                                <div class="algorithm-card" onclick="selectAlgorithm('community')">
+                                    <i class="fas fa-users"></i>
+                                    <div class="algorithm-name">Community</div>
+                                </div>
+                                <div class="algorithm-card" onclick="selectAlgorithm('pathfinding')">
+                                    <i class="fas fa-route"></i>
+                                    <div class="algorithm-name">Pathfinding</div>
+                                </div>
+                                <div class="algorithm-card" onclick="selectAlgorithm('connectivity')">
+                                    <i class="fas fa-link"></i>
+                                    <div class="algorithm-name">Connectivity</div>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary btn-full" onclick="openAnalyticsLab()">
+                                <i class="fas fa-microscope"></i>
+                                Open Analytics Lab
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Layers Panel -->
+                <div id="layers-panel" class="sidebar-section">
+                    <div class="form-group">
+                        <label class="form-label">Graph Layers</label>
+                        <div id="graph-layers"></div>
+                    </div>
+                    <button class="btn btn-primary btn-full" onclick="addLayer()">
+                        <i class="fas fa-plus"></i>
+                        Add Layer
+                    </button>
+                </div>
+
+                <!-- History Panel -->
+                <div id="history-panel" class="sidebar-section">
+                    <div class="form-group">
+                        <label class="form-label">Action History</label>
+                        <div id="action-history"></div>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-secondary" onclick="undo()" style="flex: 1;">
+                            <i class="fas fa-undo"></i>
+                            Undo
+                        </button>
+                        <button class="btn btn-secondary" onclick="redo()" style="flex: 1;">
+                            <i class="fas fa-redo"></i>
+                            Redo
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Canvas Area -->
+        <main class="main">
+            <div class="canvas-container">
+                <canvas id="mainCanvas"></canvas>
+                
+                <div class="canvas-overlay">
+                    <div class="performance-metrics">
+                        <div class="metric-card">
+                            <div class="metric-value" id="fps-counter">60</div>
+                            <div class="metric-label">FPS</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="node-count">0</div>
+                            <div class="metric-label">Nodes</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="edge-count">0</div>
+                            <div class="metric-label">Edges</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="memory-usage">0</div>
+                            <div class="metric-label">MB</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="canvas-controls">
+                    <button class="control-button tooltip" data-tooltip="Zoom In" onclick="zoomIn()">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
+                    <button class="control-button tooltip" data-tooltip="Zoom Out" onclick="zoomOut()">
+                        <i class="fas fa-search-minus"></i>
+                    </button>
+                    <button class="control-button tooltip" data-tooltip="Fit to View" onclick="fitToView()">
+                        <i class="fas fa-expand-arrows-alt"></i>
+                    </button>
+                    <button class="control-button tooltip" data-tooltip="Reset View" onclick="resetView()">
+                        <i class="fas fa-home"></i>
+                    </button>
+                    <button class="control-button tooltip" data-tooltip="Toggle Grid" onclick="toggleGrid()">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button class="control-button tooltip" data-tooltip="Toggle Minimap" onclick="toggleMinimap()">
+                        <i class="fas fa-map"></i>
+                    </button>
+                </div>
+
+                <div class="loading-overlay" id="main-loading">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Properties Panel -->
+        <aside class="properties">
+            <div class="properties-header">
+                <h3 id="properties-title">Properties</h3>
+            </div>
+            <div class="properties-content" id="properties-content">
+                <div class="form-group">
+                    <label class="form-label">Selection Info</label>
+                    <div style="color: var(--text-secondary); font-style: italic;">
+                        No selection
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="status-indicators">
+                <div class="status-indicator">
+                    <div class="status-dot" id="api-status"></div>
+                    <span>API Connected</span>
+                </div>
+                <div class="status-indicator">
+                    <div class="status-dot" id="graph-status"></div>
+                    <span>Graph Ready</span>
+                </div>
+                <div class="status-indicator">
+                    <div class="status-dot" id="render-status"></div>
+                    <span>Renderer Active</span>
+                </div>
+            </div>
+            <div>
+                Network UI Pro v2.0.0 | 
+                Zoom: <span id="zoom-level">100%</span> | 
+                Performance: <span id="performance-status">Optimal</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Advanced Import Modal -->
+    <div class="modal" id="import-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Advanced Data Import</h2>
+                <button class="modal-close" onclick="closeModal('import-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="import-wizard">
+                    <div class="wizard-nav">
+                        <div class="wizard-step active" data-step="1">
+                            <i class="fas fa-file"></i>
+                            <div>Data Source</div>
+                        </div>
+                        <div class="wizard-step" data-step="2">
+                            <i class="fas fa-eye"></i>
+                            <div>Preview</div>
+                        </div>
+                        <div class="wizard-step" data-step="3">
+                            <i class="fas fa-cogs"></i>
+                            <div>Configuration</div>
+                        </div>
+                        <div class="wizard-step" data-step="4">
+                            <i class="fas fa-check"></i>
+                            <div>Import</div>
+                        </div>
+                    </div>
+                    <div class="wizard-content" id="import-wizard-content">
+                        <!-- Import steps will be dynamically loaded -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Lab Modal -->
+    <div class="modal" id="analytics-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Analytics Laboratory</h2>
+                <button class="modal-close" onclick="closeModal('analytics-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="analytics-lab-content">
+                <!-- Analytics lab content will be dynamically loaded -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+        // Global Application State
+        const AppState = {
+            currentWorkspace: 'graph',
+            canvas: null,
+            ctx: null,
+            graphData: { nodes: [], edges: [] },
+            selectedElements: new Set(),
+            scale: 1,
+            pan: { x: 0, y: 0 },
+            isDragging: false,
+            performance: {
+                fps: 0,
+                lastFrameTime: 0,
+                frameCount: 0
+            },
+            config: {
+                rendering: {
+                    engine: 'canvas',
+                    antialiasing: true,
+                    shadows: true,
+                    animations: true
+                },
+                layout: {
+                    algorithm: 'force_directed',
+                    iterations: 100,
+                    damping: 0.8
+                },
+                visual: {
+                    nodeSize: 20,
+                    edgeWidth: 2,
+                    showLabels: true,
+                    showArrows: true
+                }
+            }
+        };
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCanvas();
+            initializeEventListeners();
+            loadDefaultData();
+            startPerformanceMonitoring();
+            checkAPIConnection();
+        });
+
+        function initializeCanvas() {
+            AppState.canvas = document.getElementById('mainCanvas');
+            AppState.ctx = AppState.canvas.getContext('2d');
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+        }
+
+        function resizeCanvas() {
+            const container = AppState.canvas.parentElement;
+            AppState.canvas.width = container.clientWidth;
+            AppState.canvas.height = container.clientHeight;
+            redrawCanvas();
+        }
+
+        function initializeEventListeners() {
+            const canvas = AppState.canvas;
+            
+            // Mouse events
+            canvas.addEventListener('mousedown', handleMouseDown);
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('mouseup', handleMouseUp);
+            canvas.addEventListener('wheel', handleWheel);
+            canvas.addEventListener('contextmenu', handleContextMenu);
+            
+            // Keyboard events
+            document.addEventListener('keydown', handleKeyDown);
+            document.addEventListener('keyup', handleKeyUp);
+        }
+
+        // Workspace Management
+        function switchWorkspace(workspace) {
+            AppState.currentWorkspace = workspace;
+            
+            // Update navigation
+            document.querySelectorAll('.nav-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Load workspace-specific content
+            loadWorkspaceContent(workspace);
+        }
+
+        function loadWorkspaceContent(workspace) {
+            const propertiesContent = document.getElementById('properties-content');
+            const propertiesTitle = document.getElementById('properties-title');
+            
+            switch(workspace) {
+                case 'graph':
+                    propertiesTitle.textContent = 'Graph Properties';
+                    loadGraphProperties();
+                    break;
+                case 'analytics':
+                    propertiesTitle.textContent = 'Analytics Configuration';
+                    loadAnalyticsProperties();
+                    break;
+                case 'data':
+                    propertiesTitle.textContent = 'Data Pipeline';
+                    loadDataProperties();
+                    break;
+                case 'settings':
+                    propertiesTitle.textContent = 'Global Settings';
+                    loadSettingsProperties();
+                    break;
+            }
+        }
+
+        // Sidebar Management
+        function switchSidebarTab(tab) {
+            document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.querySelectorAll('.sidebar-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(tab + '-panel').classList.add('active');
+        }
+
+        function toggleSection(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.fa-chevron-down, .fa-chevron-up');
+            
+            content.classList.toggle('expanded');
+            icon.classList.toggle('fa-chevron-down');
+            icon.classList.toggle('fa-chevron-up');
+        }
+
+        // Advanced Data Import
+        function openAdvancedImport() {
+            document.getElementById('import-modal').classList.add('active');
+            loadImportStep(1);
+        }
+
+        function loadImportStep(step) {
+            const content = document.getElementById('import-wizard-content');
+            
+            // Update wizard navigation
+            document.querySelectorAll('.wizard-step').forEach((s, i) => {
+                s.classList.remove('active', 'completed');
+                if (i + 1 === step) s.classList.add('active');
+                if (i + 1 < step) s.classList.add('completed');
+            });
+            
+            // Load step content
+            switch(step) {
+                case 1:
+                    content.innerHTML = createDataSourceStep();
+                    break;
+                case 2:
+                    content.innerHTML = createPreviewStep();
+                    break;
+                case 3:
+                    content.innerHTML = createConfigurationStep();
+                    break;
+                case 4:
+                    content.innerHTML = createImportStep();
+                    break;
+            }
+        }
+
+        function createDataSourceStep() {
+            return `
+                <h3>Select Data Source</h3>
+                <div class="form-group">
+                    <label class="form-label">Import Method</label>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                        <div class="algorithm-card" onclick="selectImportMethod('file')">
+                            <i class="fas fa-file-upload"></i>
+                            <div class="algorithm-name">File Upload</div>
+                        </div>
+                        <div class="algorithm-card" onclick="selectImportMethod('url')">
+                            <i class="fas fa-link"></i>
+                            <div class="algorithm-name">URL Import</div>
+                        </div>
+                        <div class="algorithm-card" onclick="selectImportMethod('api')">
+                            <i class="fas fa-code"></i>
+                            <div class="algorithm-name">API Endpoint</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="import-method-config"></div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 30px;">
+                    <button class="btn btn-primary" onclick="loadImportStep(2)">Next</button>
+                </div>
+            `;
+        }
+
+        function createPreviewStep() {
+            return `
+                <h3>Data Preview</h3>
+                <div class="form-group">
+                    <label class="form-label">Data Structure</label>
+                    <div id="data-preview-container" style="background: var(--dark-bg); border: 1px solid var(--border-color); border-radius: 6px; padding: 20px; height: 400px; overflow: auto;">
+                        <div style="text-align: center; color: var(--text-secondary); margin-top: 150px;">
+                            Preview will appear here...
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+                    <button class="btn btn-secondary" onclick="loadImportStep(1)">Previous</button>
+                    <button class="btn btn-primary" onclick="loadImportStep(3)">Next</button>
+                </div>
+            `;
+        }
+
+        function createConfigurationStep() {
+            return `
+                <h3>Import Configuration</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <div>
+                        <h4>Field Mapping</h4>
+                        <div class="form-group">
+                            <label class="form-label">Node ID Field</label>
+                            <select class="form-control" id="node-id-field">
+                                <option value="">Select field...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Node Label Field</label>
+                            <select class="form-control" id="node-label-field">
+                                <option value="">Select field...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Edge Source Field</label>
+                            <select class="form-control" id="edge-source-field">
+                                <option value="">Select field...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Edge Target Field</label>
+                            <select class="form-control" id="edge-target-field">
+                                <option value="">Select field...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <h4>Processing Options</h4>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" checked> Auto-detect data types
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" checked> Create missing nodes
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox"> Merge duplicate edges
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Validation Level</label>
+                            <select class="form-control">
+                                <option value="strict">Strict</option>
+                                <option value="moderate" selected>Moderate</option>
+                                <option value="lenient">Lenient</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 30px;">
+                    <button class="btn btn-secondary" onclick="loadImportStep(2)">Previous</button>
+                    <button class="btn btn-primary" onclick="loadImportStep(4)">Configure & Import</button>
+                </div>
+            `;
+        }
+
+        function createImportStep() {
+            return `
+                <h3>Import Progress</h3>
+                <div id="import-progress-container">
+                    <div style="text-align: center; margin: 50px 0;">
+                        <div class="loading-spinner" style="margin: 0 auto 20px;"></div>
+                        <div>Importing data...</div>
+                    </div>
+                </div>
+                <div id="import-results" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">Import Summary</label>
+                        <div id="import-summary" class="code-block"></div>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 30px;">
+                    <button class="btn btn-secondary" onclick="closeModal('import-modal')">Close</button>
+                    <button class="btn btn-success" onclick="applyImportedData()" style="display: none;" id="apply-import-btn">
+                        Apply to Graph
+                    </button>
+                </div>
+            `;
+        }
+
+        // Analytics Laboratory
+        function openAnalyticsLab() {
+            document.getElementById('analytics-modal').classList.add('active');
+            loadAnalyticsLab();
+        }
+
+        function loadAnalyticsLab() {
+            const content = document.getElementById('analytics-lab-content');
+            content.innerHTML = `
+                <div style="display: grid; grid-template-columns: 300px 1fr; gap: 30px; height: 600px;">
+                    <div>
+                        <h4>Algorithm Categories</h4>
+                        <div class="algorithm-config">
+                            <div class="algorithm-selector">
+                                <div class="algorithm-card selected" onclick="loadAlgorithmCategory('centrality')">
+                                    <i class="fas fa-circle-notch"></i>
+                                    <div class="algorithm-name">Centrality</div>
+                                </div>
+                                <div class="algorithm-card" onclick="loadAlgorithmCategory('community')">
+                                    <i class="fas fa-users"></i>
+                                    <div class="algorithm-name">Community</div>
+                                </div>
+                                <div class="algorithm-card" onclick="loadAlgorithmCategory('pathfinding')">
+                                    <i class="fas fa-route"></i>
+                                    <div class="algorithm-name">Pathfinding</div>
+                                </div>
+                                <div class="algorithm-card" onclick="loadAlgorithmCategory('connectivity')">
+                                    <i class="fas fa-link"></i>
+                                    <div class="algorithm-name">Connectivity</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4>Algorithm Configuration</h4>
+                        <div id="algorithm-config-panel">
+                            ${createCentralityConfig()}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function createCentralityConfig() {
+            return `
+                <div class="config-section">
+                    <div class="config-header" onclick="toggleSection(this)">
+                        <span>Degree Centrality</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="config-content expanded">
+                        <div class="parameter-grid">
+                            <div class="form-group">
+                                <label class="form-label">Direction</label>
+                                <select class="form-control">
+                                    <option value="both">Both</option>
+                                    <option value="in">In-degree</option>
+                                    <option value="out">Out-degree</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Normalization</label>
+                                <select class="form-control">
+                                    <option value="true">Normalized</option>
+                                    <option value="false">Raw</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary btn-full" onclick="runAnalysis('degree_centrality')">
+                            <i class="fas fa-play"></i>
+                            Run Analysis
+                        </button>
+                    </div>
+                </div>
+                <div class="config-section">
+                    <div class="config-header" onclick="toggleSection(this)">
+                        <span>Betweenness Centrality</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="config-content">
+                        <div class="parameter-grid">
+                            <div class="form-group">
+                                <label class="form-label">Sample Size</label>
+                                <input type="number" class="form-control" value="100" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Weights</label>
+                                <select class="form-control">
+                                    <option value="none">Unweighted</option>
+                                    <option value="weight">Use Edge Weights</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary btn-full" onclick="runAnalysis('betweenness_centrality')">
+                            <i class="fas fa-play"></i>
+                            Run Analysis
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Properties Panel Content
+        function loadGraphProperties() {
+            const content = document.getElementById('properties-content');
+            content.innerHTML = `
+                <div class="config-section">
+                    <div class="config-header" onclick="toggleSection(this)">
+                        <span><i class="fas fa-palette"></i> Visual Style</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="config-content expanded">
+                        <div class="form-group">
+                            <label class="form-label">Node Size: <span id="node-size-value">${AppState.config.visual.nodeSize}</span></label>
+                            <input type="range" class="form-range" min="5" max="50" value="${AppState.config.visual.nodeSize}" 
+                                   onchange="updateNodeSize(this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Edge Width: <span id="edge-width-value">${AppState.config.visual.edgeWidth}</span></label>
+                            <input type="range" class="form-range" min="1" max="10" value="${AppState.config.visual.edgeWidth}"
+                                   onchange="updateEdgeWidth(this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Color Scheme</label>
+                            <div class="color-palette">
+                                <div class="color-swatch selected" style="background: #3b82f6" onclick="selectColorScheme('blue')"></div>
+                                <div class="color-swatch" style="background: #10b981" onclick="selectColorScheme('green')"></div>
+                                <div class="color-swatch" style="background: #f59e0b" onclick="selectColorScheme('orange')"></div>
+                                <div class="color-swatch" style="background: #ef4444" onclick="selectColorScheme('red')"></div>
+                                <div class="color-swatch" style="background: #8b5cf6" onclick="selectColorScheme('purple')"></div>
+                                <div class="color-swatch" style="background: #06b6d4" onclick="selectColorScheme('cyan')"></div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" ${AppState.config.visual.showLabels ? 'checked' : ''} 
+                                       onchange="toggleLabels(this.checked)">
+                                Show Labels
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" ${AppState.config.visual.showArrows ? 'checked' : ''}
+                                       onchange="toggleArrows(this.checked)">
+                                Show Arrows
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="config-section">
+                    <div class="config-header" onclick="toggleSection(this)">
+                        <span><i class="fas fa-cogs"></i> Layout Configuration</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="config-content">
+                        <div class="form-group">
+                            <label class="form-label">Iterations: <span id="layout-iterations-value">${AppState.config.layout.iterations}</span></label>
+                            <input type="range" class="form-range" min="10" max="500" value="${AppState.config.layout.iterations}"
+                                   onchange="updateLayoutIterations(this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Damping: <span id="layout-damping-value">${AppState.config.layout.damping}</span></label>
+                            <input type="range" class="form-range" min="0.1" max="1" step="0.1" value="${AppState.config.layout.damping}"
+                                   onchange="updateLayoutDamping(this.value)">
+                        </div>
+                        <button class="btn btn-primary btn-full" onclick="recalculateLayout()">
+                            <i class="fas fa-sync"></i>
+                            Recalculate Layout
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="config-section">
+                    <div class="config-header" onclick="toggleSection(this)">
+                        <span><i class="fas fa-info-circle"></i> Graph Statistics</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="config-content">
+                        <div class="parameter-item">
+                            <span>Nodes:</span>
+                            <span class="parameter-value" id="stats-nodes">${AppState.graphData.nodes.length}</span>
+                        </div>
+                        <div class="parameter-item">
+                            <span>Edges:</span>
+                            <span class="parameter-value" id="stats-edges">${AppState.graphData.edges.length}</span>
+                        </div>
+                        <div class="parameter-item">
+                            <span>Density:</span>
+                            <span class="parameter-value" id="stats-density">0.00</span>
+                        </div>
+                        <div class="parameter-item">
+                            <span>Avg Degree:</span>
+                            <span class="parameter-value" id="stats-avg-degree">0.00</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Canvas Rendering
+        function redrawCanvas() {
+            const ctx = AppState.ctx;
+            const canvas = AppState.canvas;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Apply transformations
+            ctx.save();
+            ctx.translate(AppState.pan.x, AppState.pan.y);
+            ctx.scale(AppState.scale, AppState.scale);
+            
+            // Draw grid if enabled
+            if (AppState.showGrid) {
+                drawGrid(ctx);
+            }
+            
+            // Draw edges
+            drawEdges(ctx);
+            
+            // Draw nodes
+            drawNodes(ctx);
+            
+            ctx.restore();
+            
+            // Update performance metrics
+            updatePerformanceMetrics();
+        }
+
+        function drawNodes(ctx) {
+            AppState.graphData.nodes.forEach(node => {
+                if (!node.position) return;
+                
+                const size = node.size || AppState.config.visual.nodeSize;
+                const color = node.color || '#3b82f6';
+                
+                // Draw node
+                ctx.beginPath();
+                ctx.arc(node.position.x, node.position.y, size, 0, 2 * Math.PI);
+                ctx.fillStyle = color;
+                ctx.fill();
+                
+                // Draw border
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Draw label if enabled
+                if (AppState.config.visual.showLabels && node.name) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = '12px Inter';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(node.name, node.position.x, node.position.y + size + 15);
+                }
+            });
+        }
+
+        function drawEdges(ctx) {
+            AppState.graphData.edges.forEach(edge => {
+                const sourceNode = AppState.graphData.nodes.find(n => n.id === edge.source);
+                const targetNode = AppState.graphData.nodes.find(n => n.id === edge.target);
+                
+                if (sourceNode && targetNode && sourceNode.position && targetNode.position) {
+                    ctx.beginPath();
+                    ctx.moveTo(sourceNode.position.x, sourceNode.position.y);
+                    ctx.lineTo(targetNode.position.x, targetNode.position.y);
+                    ctx.strokeStyle = edge.color || '#64748b';
+                    ctx.lineWidth = edge.width || AppState.config.visual.edgeWidth;
+                    ctx.stroke();
+                    
+                    // Draw arrows if enabled
+                    if (AppState.config.visual.showArrows) {
+                        drawArrow(ctx, sourceNode.position, targetNode.position);
+                    }
+                }
+            });
+        }
+
+        function drawArrow(ctx, start, end) {
+            const angle = Math.atan2(end.y - start.y, end.x - start.x);
+            const arrowLength = 15;
+            const arrowAngle = Math.PI / 6;
+            
+            ctx.beginPath();
+            ctx.moveTo(end.x, end.y);
+            ctx.lineTo(
+                end.x - arrowLength * Math.cos(angle - arrowAngle),
+                end.y - arrowLength * Math.sin(angle - arrowAngle)
+            );
+            ctx.moveTo(end.x, end.y);
+            ctx.lineTo(
+                end.x - arrowLength * Math.cos(angle + arrowAngle),
+                end.y - arrowLength * Math.sin(angle + arrowAngle)
+            );
+            ctx.stroke();
+        }
+
+        // Event Handlers
+        function handleMouseDown(e) {
+            // Implementation for mouse down events
+        }
+
+        function handleMouseMove(e) {
+            // Implementation for mouse move events
+        }
+
+        function handleMouseUp(e) {
+            // Implementation for mouse up events
+        }
+
+        function handleWheel(e) {
+            e.preventDefault();
+            const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+            AppState.scale = Math.max(0.1, Math.min(5, AppState.scale * zoomFactor));
+            redrawCanvas();
+        }
+
+        function handleContextMenu(e) {
+            e.preventDefault();
+            // Show context menu
+        }
+
+        function handleKeyDown(e) {
+            // Handle keyboard shortcuts
+            if (e.ctrlKey) {
+                switch(e.key) {
+                    case 'z':
+                        e.preventDefault();
+                        undo();
+                        break;
+                    case 'y':
+                        e.preventDefault();
+                        redo();
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        saveProject();
+                        break;
+                }
+            }
+        }
+
+        function handleKeyUp(e) {
+            // Implementation for key up events
+        }
+
+        // Utility Functions
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function showLoading(show) {
+            document.getElementById('main-loading').classList.toggle('active', show);
+        }
+
+        function updatePerformanceMetrics() {
+            const now = performance.now();
+            AppState.performance.frameCount++;
+            
+            if (now - AppState.performance.lastFrameTime >= 1000) {
+                AppState.performance.fps = AppState.performance.frameCount;
+                AppState.performance.frameCount = 0;
+                AppState.performance.lastFrameTime = now;
+                
+                document.getElementById('fps-counter').textContent = AppState.performance.fps;
+            }
+            
+            document.getElementById('node-count').textContent = AppState.graphData.nodes.length;
+            document.getElementById('edge-count').textContent = AppState.graphData.edges.length;
+            document.getElementById('zoom-level').textContent = Math.round(AppState.scale * 100) + '%';
+        }
+
+        function startPerformanceMonitoring() {
+            setInterval(() => {
+                const memoryInfo = performance.memory;
+                if (memoryInfo) {
+                    const memoryMB = Math.round(memoryInfo.usedJSHeapSize / 1024 / 1024);
+                    document.getElementById('memory-usage').textContent = memoryMB;
+                }
+            }, 1000);
+        }
+
+        async function checkAPIConnection() {
+            try {
+                const response = await fetch('/health');
+                if (response.ok) {
+                    document.getElementById('api-status').className = 'status-dot';
+                } else {
+                    document.getElementById('api-status').className = 'status-dot error';
+                }
+            } catch (error) {
+                document.getElementById('api-status').className = 'status-dot error';
+            }
+        }
+
+        // Placeholder functions (will be implemented in subsequent parts)
+        function loadDefaultData() {}
+        function zoomIn() { AppState.scale *= 1.2; redrawCanvas(); }
+        function zoomOut() { AppState.scale /= 1.2; redrawCanvas(); }
+        function fitToView() {}
+        function resetView() { AppState.scale = 1; AppState.pan = {x: 0, y: 0}; redrawCanvas(); }
+        function toggleGrid() {}
+        function toggleMinimap() {}
+        function undo() {}
+        function redo() {}
+        function saveProject() {}
+        function updateNodeSize(value) { AppState.config.visual.nodeSize = value; redrawCanvas(); }
+        function updateEdgeWidth(value) { AppState.config.visual.edgeWidth = value; redrawCanvas(); }
+        function toggleLabels(checked) { AppState.config.visual.showLabels = checked; redrawCanvas(); }
+        function toggleArrows(checked) { AppState.config.visual.showArrows = checked; redrawCanvas(); }
+        function applyLayout() {}
+        function runAnalysis(algorithm) {}
+        function selectAlgorithm(type) {}
+        function addLayer() {}
+        function selectImportMethod(method) {}
+        function selectColorScheme(scheme) {}
+        function recalculateLayout() {}
+        function updateRenderingEngine() {}
+        function updatePerformanceMode() {}
+        function loadAnalyticsProperties() {}
+        function loadDataProperties() {}
+        function loadSettingsProperties() {}
+        function loadSampleData() {}
+    </script>
+</body>
+</html> 

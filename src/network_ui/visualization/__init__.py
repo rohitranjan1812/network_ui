@@ -1,7 +1,7 @@
 """
 Network UI - Graph Visualization Module (Spec 3)
 
-This module provides comprehensive graph visualization capabilities including:
+This module provides comprehensive graph visualization capabilities including: 
 - High - performance HTML5 Canvas / WebGL rendering
 - Interactive layout algorithms (force - directed, hierarchical, circular)
 - Direct manipulation (drag & drop, selection)
@@ -27,7 +27,7 @@ from .config import VisualizationConfig
 __all__ = [
     'GraphRenderer',
     'VisualConfig',
-    'LayoutAlgorithm', 
+    'LayoutAlgorithm',
     'VisualStyle',
     'ForceDirectedLayout',
     'HierarchicalLayout',

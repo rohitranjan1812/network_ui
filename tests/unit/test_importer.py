@@ -245,7 +245,7 @@ class TestDataImporter:
             mapping_config={
                 "node_id": "id",
                 "node_name": "name",
-                "attribute_type": "type"
+                "attribute_category": "category"
             }
         )
 

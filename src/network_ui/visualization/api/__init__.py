@@ -1,7 +1,7 @@
 """
 Visualization API Module
 
-Provides REST API endpoints for graph visualization operations:
+Provides REST API endpoints for graph visualization operations: 
 - Render / update graph visualizations
 - Change layout algorithms
 - Configure visual mappings
